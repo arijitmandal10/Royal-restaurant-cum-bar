@@ -137,9 +137,8 @@
   /* ── Sub-section ── */
   .subsection-title {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
-    font-style: italic;
     color: var(--royal);
     letter-spacing: 1.5px;
     text-transform: uppercase;
@@ -162,7 +161,7 @@
 
   thead th {
     font-family: 'Cinzel', serif;
-    font-size: 10.5px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--gold3);
     letter-spacing: 2px;
@@ -179,7 +178,7 @@
   tbody tr:hover { background: rgba(201,168,76,0.08); transition: background 0.2s; }
 
   tbody td {
-    font-size: 13px;
+    font-size: 15px;
     color: var(--text);
     padding: 9px 14px;
     border: 1px solid rgba(0,0,0,0.06);
@@ -201,7 +200,36 @@
   .price-col {
     font-weight: 600;
     color: #1a3a1a;
-    font-size: 13px;
+    font-size: 15px;
+  }
+
+
+  /* ── Starred items ── */
+  tr.starred-row td:first-child {
+    font-weight: 700;
+    color: var(--royal);
+    position: relative;
+  }
+  tr.starred-row td {
+    font-weight: 700;
+  }
+  .star-outside {
+    position: absolute;
+    left: -22px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    line-height: 1;
+    color: var(--gold);
+  }
+  table {
+    overflow: visible !important;
+  }
+  .section {
+    overflow: visible !important;
+  }
+  .page {
+    overflow: visible !important;
   }
 
   /* ── Beer table ── */
@@ -293,8 +321,8 @@
       <tbody>
         <tr><td>Antiquity Blue Ultra Premium</td><td>80</td><td>150</td><td class="price-col">1,500</td></tr>
         <tr><td>Blenders Pride Reserve Collection</td><td>80</td><td>150</td><td class="price-col">1,500</td></tr>
-        <tr><td>⭐ Signature Premier Grain Whisky</td><td>70</td><td>125</td><td class="price-col">1,250</td></tr>
-        <tr><td>⭐ Blenders Pride Ultra Premium</td><td>70</td><td>125</td><td class="price-col">1,250</td></tr>
+        <tr class="starred-row"><td><span class="star-outside">⭐</span>Signature Premier Grain Whisky</td><td>70</td><td>125</td><td class="price-col">1,250</td></tr>
+        <tr class="starred-row"><td><span class="star-outside">⭐</span>Blenders Pride Ultra Premium</td><td>70</td><td>125</td><td class="price-col">1,250</td></tr>
         <tr><td>Royal Stag Superior</td><td>55</td><td>100</td><td class="price-col">1,000</td></tr>
         <tr><td>Royal Challenge Premium Gold</td><td>55</td><td>100</td><td class="price-col">1,000</td></tr>
         <tr><td>Sterling Reserve B7</td><td>60</td><td>95</td><td class="price-col">950</td></tr>
@@ -308,7 +336,7 @@
     <table>
       <thead><tr><th>Brand</th><th>30ml</th><th>60ml</th><th>Bottle (Dine)</th></tr></thead>
       <tbody>
-        <tr><td class="star-brand">⭐ Jameson Irish Whiskey</td><td>140</td><td>270</td><td class="price-col">2,700</td></tr>
+        <tr class="starred-row"><td><span class="star-outside">⭐</span>Jameson Irish Whiskey</td><td>140</td><td>270</td><td class="price-col">2,700</td></tr>
       </tbody>
     </table>
 
@@ -331,13 +359,13 @@
         <tr><td>Johnnie Walker Double Black</td><td>260</td><td>495</td><td class="price-col">4,950</td></tr>
         <tr><td>Johnnie Walker Black Label</td><td>210</td><td>395</td><td class="price-col">3,950</td></tr>
         <tr><td>Chivas Regal 12</td><td>210</td><td>395</td><td class="price-col">3,950</td></tr>
-        <tr><td>⭐ Jack Daniel's</td><td>210</td><td>395</td><td class="price-col">3,950</td></tr>
+        <tr class="starred-row"><td><span class="star-outside">⭐</span>Jack Daniel's</td><td>210</td><td>395</td><td class="price-col">3,950</td></tr>
         <tr><td>Teachers 50</td><td>170</td><td>315</td><td class="price-col">3,150</td></tr>
         <tr><td>Black Dog Triple Gold Reserve</td><td>170</td><td>315</td><td class="price-col">3,150</td></tr>
         <tr><td>Ballantine's Finest</td><td>130</td><td>245</td><td class="price-col">2,500</td></tr>
         <tr><td>Johnnie Walker Red Label</td><td>130</td><td>245</td><td class="price-col">2,500</td></tr>
         <tr><td>Jim Beam Kentucky Bourbon</td><td>125</td><td>240</td><td class="price-col">2,400</td></tr>
-        <tr><td>⭐ Black Dog Centenary Black Reserve</td><td>120</td><td>225</td><td class="price-col">2,250</td></tr>
+        <tr class="starred-row"><td><span class="star-outside">⭐</span>Black Dog Centenary Black Reserve</td><td>120</td><td>225</td><td class="price-col">2,250</td></tr>
         <tr><td>Vat 69</td><td>120</td><td>215</td><td class="price-col">2,150</td></tr>
       </tbody>
     </table>
