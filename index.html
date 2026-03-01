@@ -20,266 +20,100 @@
     --text-light: #5a5a7a;
     --border: #ddd0aa;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Roboto', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; }
 
-  body {
-    font-family: 'Roboto', sans-serif;
-    background: var(--cream);
-    color: var(--text);
-    min-height: 100vh;
-  }
-
+  /* HEADER */
   header {
     background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 60%, var(--navy-light) 100%);
     padding: 18px 20px 14px;
     text-align: center;
     border-bottom: 3px solid var(--gold);
   }
-  .header-inner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-  header img {
-    width: 70px;
-    height: auto;
-    filter: drop-shadow(0 2px 8px rgba(201,168,76,0.4));
-  }
-  .header-text h1 {
-    font-family: 'Roboto', sans-serif;
-    font-size: clamp(18px, 4.5vw, 28px);
-    font-weight: 700;
-    color: var(--gold-light);
-    letter-spacing: 2px;
-    line-height: 1.15;
-  }
-  .header-text p {
-    font-size: 12px;
-    color: rgba(201,168,76,0.65);
-    letter-spacing: 3px;
-    margin-top: 4px;
-    font-weight: 400;
-  }
+  .header-inner { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+  header img { width: 70px; height: auto; filter: drop-shadow(0 2px 8px rgba(201,168,76,0.4)); }
+  .header-text h1 { font-size: clamp(18px, 4.5vw, 28px); font-weight: 700; color: var(--gold-light); letter-spacing: 2px; line-height: 1.15; }
+  .header-text p { font-size: 12px; color: rgba(201,168,76,0.65); letter-spacing: 3px; margin-top: 4px; font-weight: 400; }
 
-  .search-wrap {
-    background: var(--navy);
-    padding: 10px 16px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 2px solid var(--gold);
-  }
-  .search-inner {
-    max-width: 560px;
-    margin: 0 auto;
-    position: relative;
-  }
-  #searchInput {
-    width: 100%;
-    padding: 9px 40px 9px 14px;
-    border: 1.5px solid var(--gold);
-    border-radius: 3px;
-    background: rgba(255,255,255,0.07);
-    color: #fff;
-    font-family: 'Roboto', sans-serif;
-    font-size: 15px;
-    outline: none;
-    transition: border-color 0.2s, background 0.2s;
-  }
+  /* SEARCH */
+  .search-wrap { background: var(--navy); padding: 10px 16px; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid var(--gold); }
+  .search-inner { max-width: 560px; margin: 0 auto; position: relative; }
+  #searchInput { width: 100%; padding: 9px 40px 9px 14px; border: 1.5px solid var(--gold); border-radius: 3px; background: rgba(255,255,255,0.07); color: #fff; font-family: 'Roboto', sans-serif; font-size: 15px; outline: none; transition: border-color 0.2s, background 0.2s; }
   #searchInput::placeholder { color: rgba(201,168,76,0.45); }
   #searchInput:focus { border-color: var(--gold-light); background: rgba(255,255,255,0.11); }
-  .search-icon {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--gold);
-    font-size: 15px;
-    pointer-events: none;
-  }
-  #clearBtn {
-    display: none;
-    position: absolute;
-    right: 34px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: var(--gold);
-    font-size: 17px;
-    cursor: pointer;
-    padding: 0 4px;
-    font-family: 'Roboto', sans-serif;
-  }
+  .search-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--gold); font-size: 15px; pointer-events: none; }
+  #clearBtn { display: none; position: absolute; right: 34px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--gold); font-size: 17px; cursor: pointer; padding: 0 4px; }
 
-  .tabs-wrap {
-    background: var(--navy-dark);
-    border-bottom: 2px solid var(--gold);
-    overflow-x: auto;
-    white-space: nowrap;
-    scrollbar-width: none;
-  }
+  /* MAIN TABS */
+  .tabs-wrap { background: var(--navy-dark); border-bottom: 2px solid var(--gold); overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
   .tabs-wrap::-webkit-scrollbar { display: none; }
-  .tabs {
-    display: inline-flex;
-    min-width: 100%;
-    justify-content: center;
-  }
-  .tab-btn {
-    background: none;
-    border: none;
-    color: rgba(201,168,76,0.55);
-    font-family: 'Roboto', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 1.5px;
-    padding: 13px 20px 11px;
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    transition: color 0.2s, border-color 0.2s;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
+  .tabs { display: inline-flex; min-width: 100%; justify-content: center; }
+  .tab-btn { background: none; border: none; color: rgba(201,168,76,0.55); font-family: 'Roboto', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 1.5px; padding: 13px 20px 11px; cursor: pointer; border-bottom: 3px solid transparent; transition: color 0.2s, border-color 0.2s; text-transform: uppercase; white-space: nowrap; }
   .tab-btn:hover { color: var(--gold-light); }
   .tab-btn.active { color: var(--gold-light); border-bottom-color: var(--gold-light); }
 
-  .content {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 18px 12px 40px;
-  }
-
+  /* CONTENT */
+  .content { max-width: 800px; margin: 0 auto; padding: 18px 12px 40px; }
   #searchResults { display: none; }
   #searchResults.visible { display: block; }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
-  .section { margin-bottom: 24px; }
-
-  .section-title {
-    font-family: 'Roboto', sans-serif;
-    font-size: 13px;
+  /* ACCORDION */
+  .accordion { margin-bottom: 8px; border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }
+  .accordion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 14px;
+    background: var(--navy);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .accordion-header:hover { background: var(--navy-light); }
+  .accordion-title {
+    font-size: 12px;
     font-weight: 700;
     color: var(--gold-light);
-    letter-spacing: 2px;
+    letter-spacing: 1.8px;
     text-transform: uppercase;
-    padding: 8px 14px;
-    background: var(--navy);
-    border-left: 4px solid var(--gold);
-    margin-bottom: 2px;
   }
-
-  .subsection-title {
-    font-family: 'Roboto', sans-serif;
+  .accordion-arrow {
+    color: var(--gold);
     font-size: 11px;
-    font-weight: 500;
-    color: var(--text-light);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 7px 14px 5px;
-    border-bottom: 1px dashed var(--border);
-    margin-bottom: 0;
+    transition: transform 0.25s;
+    flex-shrink: 0;
+    margin-left: 10px;
   }
+  .accordion.open .accordion-arrow { transform: rotate(180deg); }
+  .accordion-body { display: none; }
+  .accordion.open .accordion-body { display: block; }
 
+  /* MENU TABLE */
   .menu-table { width: 100%; border-collapse: collapse; }
   .menu-table tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
   .menu-table tr:nth-child(even) { background: var(--gold-pale2); }
   .menu-table tr:hover { background: var(--gold-pale); }
   .menu-table td { padding: 8px 12px; vertical-align: middle; }
+  .item-name { color: var(--text); font-weight: 500; font-size: 14px; line-height: 1.2; }
+  .item-bn { color: var(--text-light); font-size: 12px; font-family: 'Hind Siliguri', sans-serif; display: block; margin-top: 1px; font-weight: 400; }
+  .item-price { text-align: right; color: var(--navy); font-weight: 700; font-size: 14px; white-space: nowrap; min-width: 55px; }
+  .item-size { text-align: center; color: var(--text-light); font-size: 13px; white-space: nowrap; padding: 8px 8px; }
+  .price-header { background: var(--navy-dark) !important; }
+  .price-header td { color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 5px 12px; border-bottom: none !important; }
+  .price-header:hover { background: var(--navy-dark) !important; }
 
-  .item-name {
-    color: var(--text);
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 1.2;
-    font-family: 'Roboto', sans-serif;
-  }
-  .item-bn {
-    color: var(--text-light);
-    font-size: 12px;
-    font-family: 'Hind Siliguri', sans-serif;
-    display: block;
-    margin-top: 1px;
-    font-weight: 400;
-  }
-  .item-price {
-    text-align: right;
-    color: var(--navy);
-    font-weight: 700;
-    font-size: 14px;
-    white-space: nowrap;
-    min-width: 55px;
-    font-family: 'Roboto', sans-serif;
-  }
-  .item-size {
-    text-align: center;
-    color: var(--text-light);
-    font-size: 13px;
-    white-space: nowrap;
-    padding: 8px 8px;
-    font-family: 'Roboto', sans-serif;
-  }
-  .price-header { background: var(--navy) !important; }
-  .price-header td {
-    color: var(--gold);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 5px 12px;
-    border-bottom: none !important;
-    font-family: 'Roboto', sans-serif;
-  }
-  .price-header:hover { background: var(--navy) !important; }
-
-  .pricing-note {
-    background: var(--navy);
-    color: var(--gold-pale);
-    border-radius: 3px;
-    padding: 12px 16px;
-    margin: 0 0 16px;
-    font-size: 13px;
-    line-height: 1.6;
-    border-left: 4px solid var(--gold);
-    font-family: 'Roboto', sans-serif;
-  }
+  /* PRICING NOTE */
+  .pricing-note { background: var(--navy); color: var(--gold-pale); border-radius: 3px; padding: 12px 16px; margin-top: 24px; font-size: 13px; line-height: 1.6; border-left: 4px solid var(--gold); }
   .pricing-note strong { color: var(--gold-light); }
 
+  /* SEARCH */
   .highlight { background: rgba(201,168,76,0.3); border-radius: 2px; }
-  .no-results {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--text-light);
-    font-size: 16px;
-    font-family: 'Roboto', sans-serif;
-  }
-  .search-section-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gold);
-    background: var(--navy);
-    padding: 4px 12px;
-    display: inline-block;
-    margin: 14px 0 4px;
-    border-radius: 2px;
-    font-family: 'Roboto', sans-serif;
-  }
+  .no-results { text-align: center; padding: 40px 20px; color: var(--text-light); font-size: 16px; }
+  .search-section-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); background: var(--navy); padding: 4px 12px; display: inline-block; margin: 14px 0 4px; border-radius: 2px; }
 
-  footer {
-    text-align: center;
-    background: var(--navy-dark);
-    color: rgba(201,168,76,0.5);
-    padding: 14px;
-    font-size: 12px;
-    border-top: 2px solid var(--gold);
-    letter-spacing: 1px;
-    font-family: 'Roboto', sans-serif;
-  }
+  footer { text-align: center; background: var(--navy-dark); color: rgba(201,168,76,0.5); padding: 14px; font-size: 12px; border-top: 2px solid var(--gold); letter-spacing: 1px; }
 
   @media (max-width: 480px) {
     .tab-btn { font-size: 12px; padding: 11px 14px 10px; letter-spacing: 0.8px; }
@@ -303,7 +137,7 @@
 <div class="search-wrap">
   <div class="search-inner">
     <input type="text" id="searchInput" placeholder="Search menu items..." autocomplete="off">
-    <button id="clearBtn" onclick="clearSearch()">✕</button>
+    <button id="clearBtn" onclick="clearSearch()">&#x2715;</button>
     <span class="search-icon">&#x2315;</span>
   </div>
 </div>
@@ -312,202 +146,286 @@
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('food', this)">Food</button>
     <button class="tab-btn" onclick="switchTab('whisky', this)">Whisky</button>
-    <button class="tab-btn" onclick="switchTab('beer-wine', this)">Beer & Wine</button>
-    <button class="tab-btn" onclick="switchTab('vodka-rum', this)">Vodka & Rum</button>
+    <button class="tab-btn" onclick="switchTab('beer-wine', this)">Beer &amp; Wine</button>
+    <button class="tab-btn" onclick="switchTab('vodka-rum', this)">Vodka &amp; Rum</button>
   </div>
 </div>
 
 <div class="content">
-
   <div id="searchResults"></div>
 
-  <!-- FOOD TAB -->
+  <!-- ══ FOOD TAB ══ -->
   <div class="tab-panel active" id="tab-food">
 
-    <div class="section">
-      <div class="section-title">Starters</div>
-
-      <div class="subsection-title">Chicken & Seafood</div>
-      <table class="menu-table">
-        <tr><td><span class="item-name">Chilli Chicken Dry</span><span class="item-bn">চিলি চিকেন ড্রাই</span></td><td class="item-price">₹199</td></tr>
-        <tr><td><span class="item-name">Chicken Dry</span><span class="item-bn">চিকেন ড্রাই</span></td><td class="item-price">₹199</td></tr>
-        <tr><td><span class="item-name">Chicken Pakora</span><span class="item-bn">চিকেন পকোড়া</span></td><td class="item-price">₹189</td></tr>
-        <tr><td><span class="item-name">Crispy Chicken</span><span class="item-bn">ক্রিসপি চিকেন</span></td><td class="item-price">₹219</td></tr>
-        <tr><td><span class="item-name">Chicken Manchurian Dry</span><span class="item-bn">চিকেন মাঞ্চুরিয়ান ড্রাই</span></td><td class="item-price">₹249</td></tr>
-        <tr><td><span class="item-name">Chicken Dry Fry</span><span class="item-bn">চিকেন ড্রাই ফ্রাই</span></td><td class="item-price">₹199</td></tr>
-        <tr><td><span class="item-name">Chicken Lollipop</span><span class="item-bn">চিকেন ললিপপ</span></td><td class="item-price">₹229</td></tr>
-        <tr><td><span class="item-name">Fish Fry (2 pcs)</span><span class="item-bn">মাছ ফ্রাই (২ পিস)</span></td><td class="item-price">₹199</td></tr>
-        <tr><td><span class="item-name">Crispy Chilli Baby Corn</span><span class="item-bn">ক্রিসপি চিলি বেবি কর্ন</span></td><td class="item-price">₹179</td></tr>
-      </table>
-
-      <div class="subsection-title">Paneer</div>
-      <table class="menu-table">
-        <tr><td><span class="item-name">Paneer 65</span><span class="item-bn">পনির ৬৫</span></td><td class="item-price">₹179</td></tr>
-        <tr><td><span class="item-name">Chilli Paneer Dry</span><span class="item-bn">চিলি পনির ড্রাই</span></td><td class="item-price">₹179</td></tr>
-        <tr><td><span class="item-name">Paneer Bhurji</span><span class="item-bn">পনির ভুর্জি</span></td><td class="item-price">₹199</td></tr>
-        <tr><td><span class="item-name">Paneer Pakora</span><span class="item-bn">পনির পকোড়া</span></td><td class="item-price">₹99</td></tr>
-      </table>
-
-      <div class="subsection-title">Egg</div>
-      <table class="menu-table">
-        <tr><td><span class="item-name">Egg Bhurji</span><span class="item-bn">ডিম ভুর্জি</span></td><td class="item-price">₹49</td></tr>
-        <tr><td><span class="item-name">Masala Omlette</span><span class="item-bn">মশলা অমলেট</span></td><td class="item-price">₹39</td></tr>
-        <tr><td><span class="item-name">Plain Omlette</span><span class="item-bn">সাধারণ অমলেট</span></td><td class="item-price">₹39</td></tr>
-        <tr><td><span class="item-name">Boiled Egg (2 pcs)</span><span class="item-bn">সেদ্ধ ডিম (২ পিস)</span></td><td class="item-price">₹39</td></tr>
-      </table>
-
-      <div class="subsection-title">Snacks</div>
-      <table class="menu-table">
-        <tr><td><span class="item-name">Papad Fry</span><span class="item-bn">পাপড় ফ্রাই</span></td><td class="item-price">₹29</td></tr>
-        <tr><td><span class="item-name">Papaod Roast</span><span class="item-bn">পাপড় রোস্ট</span></td><td class="item-price">₹19</td></tr>
-        <tr><td><span class="item-name">Masala Papad</span><span class="item-bn">মশলা পাপড়</span></td><td class="item-price">₹39</td></tr>
-      </table>
+    <!-- DEFAULT OPEN: Starters -->
+    <div class="accordion open" id="acc-starters-chicken">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <span class="accordion-title">Starters — Chicken &amp; Seafood</span>
+        <span class="accordion-arrow">&#9660;</span>
+      </div>
+      <div class="accordion-body">
+        <table class="menu-table">
+          <tr><td><span class="item-name">Chilli Chicken Dry</span><span class="item-bn">চিলি চিকেন ড্রাই</span></td><td class="item-price">&#8377;199</td></tr>
+          <tr><td><span class="item-name">Chicken Dry</span><span class="item-bn">চিকেন ড্রাই</span></td><td class="item-price">&#8377;199</td></tr>
+          <tr><td><span class="item-name">Chicken Pakora</span><span class="item-bn">চিকেন পকোড়া</span></td><td class="item-price">&#8377;189</td></tr>
+          <tr><td><span class="item-name">Crispy Chicken</span><span class="item-bn">ক্রিসপি চিকেন</span></td><td class="item-price">&#8377;219</td></tr>
+          <tr><td><span class="item-name">Chicken Manchurian Dry</span><span class="item-bn">চিকেন মাঞ্চুরিয়ান ড্রাই</span></td><td class="item-price">&#8377;249</td></tr>
+          <tr><td><span class="item-name">Chicken Dry Fry</span><span class="item-bn">চিকেন ড্রাই ফ্রাই</span></td><td class="item-price">&#8377;199</td></tr>
+          <tr><td><span class="item-name">Chicken Lollipop</span><span class="item-bn">চিকেন ললিপপ</span></td><td class="item-price">&#8377;229</td></tr>
+          <tr><td><span class="item-name">Fish Fry (2 pcs)</span><span class="item-bn">মাছ ফ্রাই (২ পিস)</span></td><td class="item-price">&#8377;199</td></tr>
+          <tr><td><span class="item-name">Crispy Chilli Baby Corn</span><span class="item-bn">ক্রিসপি চিলি বেবি কর্ন</span></td><td class="item-price">&#8377;179</td></tr>
+        </table>
+      </div>
     </div>
 
-    <div class="section">
-      <div class="section-title">Salads</div>
-      <table class="menu-table">
-        <tr><td><span class="item-name">Green Salad</span><span class="item-bn">সবুজ সালাড</span></td><td class="item-price">₹59</td></tr>
-        <tr><td><span class="item-name">Onion Salad</span><span class="item-bn">পেঁয়াজ সালাড</span></td><td class="item-price">₹39</td></tr>
-        <tr><td><span class="item-name">Cucumber Salad</span><span class="item-bn">শসা সালাড</span></td><td class="item-price">₹39</td></tr>
-        <tr><td><span class="item-name">Lemon & Chilli Salad</span><span class="item-bn">লেবু ও চিলি সালাড</span></td><td class="item-price">₹29</td></tr>
-        <tr><td><span class="item-name">Rocket Salad</span><span class="item-bn">রকেট সালাড</span></td><td class="item-price">₹99</td></tr>
-      </table>
+    <div class="accordion" id="acc-starters-paneer">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <span class="accordion-title">Starters — Paneer</span>
+        <span class="accordion-arrow">&#9660;</span>
+      </div>
+      <div class="accordion-body">
+        <table class="menu-table">
+          <tr><td><span class="item-name">Paneer 65</span><span class="item-bn">পনির ৬৫</span></td><td class="item-price">&#8377;179</td></tr>
+          <tr><td><span class="item-name">Chilli Paneer Dry</span><span class="item-bn">চিলি পনির ড্রাই</span></td><td class="item-price">&#8377;179</td></tr>
+          <tr><td><span class="item-name">Paneer Bhurji</span><span class="item-bn">পনির ভুর্জি</span></td><td class="item-price">&#8377;199</td></tr>
+          <tr><td><span class="item-name">Paneer Pakora</span><span class="item-bn">পনির পকোড়া</span></td><td class="item-price">&#8377;99</td></tr>
+        </table>
+      </div>
     </div>
 
+    <div class="accordion" id="acc-starters-egg">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <span class="accordion-title">Starters — Egg</span>
+        <span class="accordion-arrow">&#9660;</span>
+      </div>
+      <div class="accordion-body">
+        <table class="menu-table">
+          <tr><td><span class="item-name">Egg Bhurji</span><span class="item-bn">ডিম ভুর্জি</span></td><td class="item-price">&#8377;49</td></tr>
+          <tr><td><span class="item-name">Masala Omlette</span><span class="item-bn">মশলা অমলেট</span></td><td class="item-price">&#8377;39</td></tr>
+          <tr><td><span class="item-name">Plain Omlette</span><span class="item-bn">সাধারণ অমলেট</span></td><td class="item-price">&#8377;39</td></tr>
+          <tr><td><span class="item-name">Boiled Egg (2 pcs)</span><span class="item-bn">সেদ্ধ ডিম (২ পিস)</span></td><td class="item-price">&#8377;39</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="accordion" id="acc-starters-snacks">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <span class="accordion-title">Starters — Snacks</span>
+        <span class="accordion-arrow">&#9660;</span>
+      </div>
+      <div class="accordion-body">
+        <table class="menu-table">
+          <tr><td><span class="item-name">Papad Fry</span><span class="item-bn">পাপড় ফ্রাই</span></td><td class="item-price">&#8377;29</td></tr>
+          <tr><td><span class="item-name">Papaod Roast</span><span class="item-bn">পাপড় রোস্ট</span></td><td class="item-price">&#8377;19</td></tr>
+          <tr><td><span class="item-name">Masala Papad</span><span class="item-bn">মশলা পাপড়</span></td><td class="item-price">&#8377;39</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="accordion" id="acc-salads">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <span class="accordion-title">Salads</span>
+        <span class="accordion-arrow">&#9660;</span>
+      </div>
+      <div class="accordion-body">
+        <table class="menu-table">
+          <tr><td><span class="item-name">Green Salad</span><span class="item-bn">সবুজ সালাড</span></td><td class="item-price">&#8377;59</td></tr>
+          <tr><td><span class="item-name">Onion Salad</span><span class="item-bn">পেঁয়াজ সালাড</span></td><td class="item-price">&#8377;39</td></tr>
+          <tr><td><span class="item-name">Cucumber Salad</span><span class="item-bn">শসা সালাড</span></td><td class="item-price">&#8377;39</td></tr>
+          <tr><td><span class="item-name">Lemon &amp; Chilli Salad</span><span class="item-bn">লেবু ও চিলি সালাড</span></td><td class="item-price">&#8377;29</td></tr>
+          <tr><td><span class="item-name">Rocket Salad</span><span class="item-bn">রকেট সালাড</span></td><td class="item-price">&#8377;99</td></tr>
+        </table>
+      </div>
+    </div>
   </div>
 
-  <!-- WHISKY TAB -->
+  <!-- ══ WHISKY TAB ══ -->
   <div class="tab-panel" id="tab-whisky">
-<div class="section">
-      <div class="section-title">Premium Scotch & International</div>
-      <table class="menu-table">
-        <tr class="price-header"><td>Brand</td><td class="item-size">30ml</td><td class="item-size">60ml</td><td class="item-price">Bottle</td></tr>
-        <tr><td class="item-name">Johnnie Walker Gold Label Reserve</td><td class="item-size">₹310</td><td class="item-size">₹605</td><td class="item-price">₹6,050</td></tr>
-        <tr><td class="item-name">Glenfiddich 12 YO</td><td class="item-size">₹290</td><td class="item-size">₹565</td><td class="item-price">₹5,250</td></tr>
-        <tr><td class="item-name">Johnnie Walker Double Black</td><td class="item-size">₹260</td><td class="item-size">₹495</td><td class="item-price">₹4,950</td></tr>
-        <tr><td class="item-name">Johnnie Walker Black Label</td><td class="item-size">₹210</td><td class="item-size">₹395</td><td class="item-price">₹3,950</td></tr>
-        <tr><td class="item-name">Chivas Regal 12</td><td class="item-size">₹210</td><td class="item-size">₹395</td><td class="item-price">₹3,950</td></tr>
-        <tr><td class="item-name">Jack Daniel's</td><td class="item-size">₹210</td><td class="item-size">₹395</td><td class="item-price">₹3,950</td></tr>
-        <tr><td class="item-name">Teachers 50</td><td class="item-size">₹170</td><td class="item-size">₹315</td><td class="item-price">₹3,150</td></tr>
-        <tr><td class="item-name">Black Dog Triple Gold Reserve</td><td class="item-size">₹170</td><td class="item-size">₹315</td><td class="item-price">₹3,150</td></tr>
-        <tr><td class="item-name">Ballantine's Finest</td><td class="item-size">₹130</td><td class="item-size">₹245</td><td class="item-price">₹2,500</td></tr>
-        <tr><td class="item-name">Johnnie Walker Red Label</td><td class="item-size">₹130</td><td class="item-size">₹245</td><td class="item-price">₹2,500</td></tr>
-        <tr><td class="item-name">Jim Beam Kentucky Bourbon</td><td class="item-size">₹125</td><td class="item-size">₹240</td><td class="item-price">₹2,400</td></tr>
-        <tr><td class="item-name">Black Dog Centenary Black Reserve</td><td class="item-size">₹120</td><td class="item-size">₹225</td><td class="item-price">₹2,250</td></tr>
-        <tr><td class="item-name">Vat 69</td><td class="item-size">₹120</td><td class="item-size">₹215</td><td class="item-price">₹2,150</td></tr>
-      </table>
+
+    <!-- DEFAULT OPEN: Premium Indian -->
+    <div class="accordion open" id="acc-indian">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <span class="accordion-title">Premium Indian Whisky</span>
+        <span class="accordion-arrow">&#9660;</span>
+      </div>
+      <div class="accordion-body">
+        <table class="menu-table">
+          <tr class="price-header"><td>Brand</td><td class="item-size">30ml</td><td class="item-size">60ml</td><td class="item-price">Bottle</td></tr>
+          <tr><td class="item-name">Antiquity Blue Ultra Premium</td><td class="item-size">&#8377;80</td><td class="item-size">&#8377;150</td><td class="item-price">&#8377;1,500</td></tr>
+          <tr><td class="item-name">Blenders Pride Reserve Collection</td><td class="item-size">&#8377;80</td><td class="item-size">&#8377;150</td><td class="item-price">&#8377;1,500</td></tr>
+          <tr><td class="item-name">Signature Premier Grain Whisky</td><td class="item-size">&#8377;70</td><td class="item-size">&#8377;125</td><td class="item-price">&#8377;1,250</td></tr>
+          <tr><td class="item-name">Blenders Pride Ultra Premium</td><td class="item-size">&#8377;70</td><td class="item-size">&#8377;125</td><td class="item-price">&#8377;1,250</td></tr>
+          <tr><td class="item-name">Royal Stag Superior</td><td class="item-size">&#8377;55</td><td class="item-size">&#8377;100</td><td class="item-price">&#8377;1,000</td></tr>
+          <tr><td class="item-name">Royal Challenge Premium Gold</td><td class="item-size">&#8377;55</td><td class="item-size">&#8377;100</td><td class="item-price">&#8377;1,000</td></tr>
+          <tr><td class="item-name">Sterling Reserve B7</td><td class="item-size">&#8377;60</td><td class="item-size">&#8377;95</td><td class="item-price">&#8377;950</td></tr>
+          <tr><td class="item-name">McDowell's No.1 Luxury Blended</td><td class="item-size">&#8377;50</td><td class="item-size">&#8377;90</td><td class="item-price">&#8377;900</td></tr>
+          <tr><td class="item-name">Imperial Blue Superior Grain</td><td class="item-size">&#8377;50</td><td class="item-size">&#8377;85</td><td class="item-price">&#8377;850</td></tr>
+          <tr><td class="item-name">McDowell's No.1 Superior</td><td class="item-size">&#8377;50</td><td class="item-size">&#8377;85</td><td class="item-price">&#8377;850</td></tr>
+        </table>
+      </div>
     </div>
 
-    <div class="section">
-      <div class="section-title">Irish Whiskey</div>
-      <table class="menu-table">
-        <tr class="price-header"><td>Brand</td><td class="item-size">30ml</td><td class="item-size">60ml</td><td class="item-price">Bottle</td></tr>
-        <tr><td class="item-name">Jameson Irish Whiskey</td><td class="item-size">₹140</td><td class="item-size">₹270</td><td class="item-price">₹2,700</td></tr>
-      </table>
+    <div class="accordion" id="acc-pscotch">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <span class="accordion-title">Premium Scotch &amp; International</span>
+        <span class="accordion-arrow">&#9660;</span>
+      </div>
+      <div class="accordion-body">
+        <table class="menu-table">
+          <tr class="price-header"><td>Brand</td><td class="item-size">30ml</td><td class="item-size">60ml</td><td class="item-price">Bottle</td></tr>
+          <tr><td class="item-name">Johnnie Walker Gold Label Reserve</td><td class="item-size">&#8377;310</td><td class="item-size">&#8377;605</td><td class="item-price">&#8377;6,050</td></tr>
+          <tr><td class="item-name">Glenfiddich 12 YO</td><td class="item-size">&#8377;290</td><td class="item-size">&#8377;565</td><td class="item-price">&#8377;5,250</td></tr>
+          <tr><td class="item-name">Johnnie Walker Double Black</td><td class="item-size">&#8377;260</td><td class="item-size">&#8377;495</td><td class="item-price">&#8377;4,950</td></tr>
+          <tr><td class="item-name">Johnnie Walker Black Label</td><td class="item-size">&#8377;210</td><td class="item-size">&#8377;395</td><td class="item-price">&#8377;3,950</td></tr>
+          <tr><td class="item-name">Chivas Regal 12</td><td class="item-size">&#8377;210</td><td class="item-size">&#8377;395</td><td class="item-price">&#8377;3,950</td></tr>
+          <tr><td class="item-name">Jack Daniel's</td><td class="item-size">&#8377;210</td><td class="item-size">&#8377;395</td><td class="item-price">&#8377;3,950</td></tr>
+          <tr><td class="item-name">Teachers 50</td><td class="item-size">&#8377;170</td><td class="item-size">&#8377;315</td><td class="item-price">&#8377;3,150</td></tr>
+          <tr><td class="item-name">Black Dog Triple Gold Reserve</td><td class="item-size">&#8377;170</td><td class="item-size">&#8377;315</td><td class="item-price">&#8377;3,150</td></tr>
+          <tr><td class="item-name">Ballantine's Finest</td><td class="item-size">&#8377;130</td><td class="item-size">&#8377;245</td><td class="item-price">&#8377;2,500</td></tr>
+          <tr><td class="item-name">Johnnie Walker Red Label</td><td class="item-size">&#8377;130</td><td class="item-size">&#8377;245</td><td class="item-price">&#8377;2,500</td></tr>
+          <tr><td class="item-name">Jim Beam Kentucky Bourbon</td><td class="item-size">&#8377;125</td><td class="item-size">&#8377;240</td><td class="item-price">&#8377;2,400</td></tr>
+          <tr><td class="item-name">Black Dog Centenary Black Reserve</td><td class="item-size">&#8377;120</td><td class="item-size">&#8377;225</td><td class="item-price">&#8377;2,250</td></tr>
+          <tr><td class="item-name">Vat 69</td><td class="item-size">&#8377;120</td><td class="item-size">&#8377;215</td><td class="item-price">&#8377;2,150</td></tr>
+        </table>
+      </div>
     </div>
 
-    <div class="section">
-      <div class="section-title">Mid-Range Blended Scotch</div>
-      <table class="menu-table">
-        <tr class="price-header"><td>Brand</td><td class="item-size">30ml</td><td class="item-size">60ml</td><td class="item-price">Bottle</td></tr>
-        <tr><td class="item-name">Black & White Blended Scotch</td><td class="item-size">₹130</td><td class="item-size">₹235</td><td class="item-price">₹2,350</td></tr>
-        <tr><td class="item-name">Seagrams 100 Pipers Deluxe Scotch</td><td class="item-size">₹130</td><td class="item-size">₹235</td><td class="item-price">₹2,350</td></tr>
-        <tr><td class="item-name">Teachers Highland Cream</td><td class="item-size">₹130</td><td class="item-size">₹235</td><td class="item-price">₹2,350</td></tr>
-      </table>
+    <div class="accordion" id="acc-midrange">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <span class="accordion-title">Mid-Range Blended Scotch</span>
+        <span class="accordion-arrow">&#9660;</span>
+      </div>
+      <div class="accordion-body">
+        <table class="menu-table">
+          <tr class="price-header"><td>Brand</td><td class="item-size">30ml</td><td class="item-size">60ml</td><td class="item-price">Bottle</td></tr>
+          <tr><td class="item-name">Black &amp; White Blended Scotch</td><td class="item-size">&#8377;130</td><td class="item-size">&#8377;235</td><td class="item-price">&#8377;2,350</td></tr>
+          <tr><td class="item-name">Seagrams 100 Pipers Deluxe Scotch</td><td class="item-size">&#8377;130</td><td class="item-size">&#8377;235</td><td class="item-price">&#8377;2,350</td></tr>
+          <tr><td class="item-name">Teachers Highland Cream</td><td class="item-size">&#8377;130</td><td class="item-size">&#8377;235</td><td class="item-price">&#8377;2,350</td></tr>
+        </table>
+      </div>
     </div>
 
-    <div class="section">
-      <div class="section-title">Premium Indian Whisky</div>
-      <table class="menu-table">
-        <tr class="price-header"><td>Brand</td><td class="item-size">30ml</td><td class="item-size">60ml</td><td class="item-price">Bottle</td></tr>
-        <tr><td class="item-name">Antiquity Blue Ultra Premium</td><td class="item-size">₹80</td><td class="item-size">₹150</td><td class="item-price">₹1,500</td></tr>
-        <tr><td class="item-name">Blenders Pride Reserve Collection</td><td class="item-size">₹80</td><td class="item-size">₹150</td><td class="item-price">₹1,500</td></tr>
-        <tr><td class="item-name">Signature Premier Grain Whisky</td><td class="item-size">₹70</td><td class="item-size">₹125</td><td class="item-price">₹1,250</td></tr>
-        <tr><td class="item-name">Blenders Pride Ultra Premium</td><td class="item-size">₹70</td><td class="item-size">₹125</td><td class="item-price">₹1,250</td></tr>
-        <tr><td class="item-name">Royal Stag Superior</td><td class="item-size">₹55</td><td class="item-size">₹100</td><td class="item-price">₹1,000</td></tr>
-        <tr><td class="item-name">Royal Challenge Premium Gold</td><td class="item-size">₹55</td><td class="item-size">₹100</td><td class="item-price">₹1,000</td></tr>
-        <tr><td class="item-name">Sterling Reserve B7</td><td class="item-size">₹60</td><td class="item-size">₹95</td><td class="item-price">₹950</td></tr>
-        <tr><td class="item-name">McDowell's No.1 Luxury Blended</td><td class="item-size">₹50</td><td class="item-size">₹90</td><td class="item-price">₹900</td></tr>
-        <tr><td class="item-name">Imperial Blue Superior Grain</td><td class="item-size">₹50</td><td class="item-size">₹85</td><td class="item-price">₹850</td></tr>
-        <tr><td class="item-name">McDowell's No.1 Superior</td><td class="item-size">₹50</td><td class="item-size">₹85</td><td class="item-price">₹850</td></tr>
-      </table>
-    </div>
-  </div>
-
-  <!-- VODKA & RUM TAB -->
-  <div class="tab-panel" id="tab-vodka-rum">
-<div class="section">
-      <div class="section-title">Vodka</div>
-      <table class="menu-table">
-        <tr class="price-header"><td>Brand</td><td class="item-size">30ml</td><td class="item-size">60ml</td><td class="item-price">Bottle</td></tr>
-        <tr><td class="item-name">Grey Goose</td><td class="item-size">₹220</td><td class="item-size">₹430</td><td class="item-price">₹4,300</td></tr>
-        <tr><td class="item-name">Absolut</td><td class="item-size">₹130</td><td class="item-size">₹245</td><td class="item-price">₹2,450</td></tr>
-        <tr><td class="item-name">Magic Moments (All Flavors)</td><td class="item-size">₹55</td><td class="item-size">₹100</td><td class="item-price">₹1,000</td></tr>
-        <tr><td class="item-name">Magic Moments Pure Grain</td><td class="item-size">₹50</td><td class="item-size">₹90</td><td class="item-price">₹900</td></tr>
-      </table>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Rum</div>
-      <table class="menu-table">
-        <tr class="price-header"><td>Brand</td><td class="item-size">30ml</td><td class="item-size">60ml</td><td class="item-price">Bottle</td></tr>
-        <tr><td class="item-name">Old Monk Coffee XO</td><td class="item-size">₹80</td><td class="item-size">₹135</td><td class="item-price">₹1,350</td></tr>
-        <tr><td class="item-name">Bacardi Limon</td><td class="item-size">₹70</td><td class="item-size">₹125</td><td class="item-price">₹1,250</td></tr>
-        <tr><td class="item-name">Bacardi Mango Chilli</td><td class="item-size">₹70</td><td class="item-size">₹125</td><td class="item-price">₹1,250</td></tr>
-        <tr><td class="item-name">Old Monk Matured XXX</td><td class="item-size">₹50</td><td class="item-size">₹75</td><td class="item-price">₹750</td></tr>
-      </table>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Brandy</div>
-      <table class="menu-table">
-        <tr class="price-header"><td>Brand</td><td class="item-size">30ml</td><td class="item-size">60ml</td><td class="item-price">Bottle</td></tr>
-        <tr><td class="item-name">Honey Bee Brandy</td><td class="item-size">₹50</td><td class="item-size">₹85</td><td class="item-price">₹850</td></tr>
-      </table>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Gin</div>
-      <table class="menu-table">
-        <tr class="price-header"><td>Brand</td><td class="item-size">30ml</td><td class="item-size">60ml</td><td class="item-price">Bottle</td></tr>
-        <tr><td class="item-name">Bombay Sapphire London Dry Gin</td><td class="item-size">₹160</td><td class="item-size">₹315</td><td class="item-price">₹3,000</td></tr>
-      </table>
+    <div class="accordion" id="acc-irish">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <span class="accordion-title">Irish Whiskey</span>
+        <span class="accordion-arrow">&#9660;</span>
+      </div>
+      <div class="accordion-body">
+        <table class="menu-table">
+          <tr class="price-header"><td>Brand</td><td class="item-size">30ml</td><td class="item-size">60ml</td><td class="item-price">Bottle</td></tr>
+          <tr><td class="item-name">Jameson Irish Whiskey</td><td class="item-size">&#8377;140</td><td class="item-size">&#8377;270</td><td class="item-price">&#8377;2,700</td></tr>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- BEER & WINE TAB -->
+  <!-- ══ BEER & WINE TAB ══ -->
   <div class="tab-panel" id="tab-beer-wine">
-<div class="section">
-      <div class="section-title">Beer & Breezer</div>
-      <table class="menu-table">
-        <tr class="price-header"><td>Brand</td><td class="item-size">Size</td><td class="item-price">Dine-In</td></tr>
-        <tr><td class="item-name">Corona Extra Premium Lager</td><td class="item-size">330ml</td><td class="item-price">₹380</td></tr>
-        <tr><td class="item-name">Budweiser Magnum Strong</td><td class="item-size">650ml</td><td class="item-price">₹320</td></tr>
-        <tr><td class="item-name">Carlsberg Elephant Premium Pilsner</td><td class="item-size">650ml</td><td class="item-price">₹320</td></tr>
-        <tr><td class="item-name">Budweiser Premium</td><td class="item-size">650ml</td><td class="item-price">₹280</td></tr>
-        <tr><td class="item-name">Budweiser Magnum Strong</td><td class="item-size">500ml</td><td class="item-price">₹270</td></tr>
-        <tr><td class="item-name">Bacardi Breezer (All Flavours)</td><td class="item-size">275ml</td><td class="item-price">₹250</td></tr>
-        <tr><td class="item-name">Budweiser Premium</td><td class="item-size">500ml</td><td class="item-price">₹230</td></tr>
-        <tr><td class="item-name">Kingfisher Imperial Strong</td><td class="item-size">650ml</td><td class="item-price">₹250</td></tr>
-        <tr><td class="item-name">Tuborg Premium Danish Strong</td><td class="item-size">650ml</td><td class="item-price">₹250</td></tr>
-      </table>
+
+    <!-- DEFAULT OPEN: Beer & Breezer -->
+    <div class="accordion open" id="acc-beer">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <span class="accordion-title">Beer &amp; Breezer</span>
+        <span class="accordion-arrow">&#9660;</span>
+      </div>
+      <div class="accordion-body">
+        <table class="menu-table">
+          <tr class="price-header"><td>Brand</td><td class="item-size">Size</td><td class="item-price">Dine-In</td></tr>
+          <tr><td class="item-name">Corona Extra Premium Lager</td><td class="item-size">330ml</td><td class="item-price">&#8377;380</td></tr>
+          <tr><td class="item-name">Budweiser Magnum Strong</td><td class="item-size">650ml</td><td class="item-price">&#8377;320</td></tr>
+          <tr><td class="item-name">Carlsberg Elephant Premium Pilsner</td><td class="item-size">650ml</td><td class="item-price">&#8377;320</td></tr>
+          <tr><td class="item-name">Budweiser Premium</td><td class="item-size">650ml</td><td class="item-price">&#8377;280</td></tr>
+          <tr><td class="item-name">Budweiser Magnum Strong</td><td class="item-size">500ml</td><td class="item-price">&#8377;270</td></tr>
+          <tr><td class="item-name">Bacardi Breezer (All Flavours)</td><td class="item-size">275ml</td><td class="item-price">&#8377;250</td></tr>
+          <tr><td class="item-name">Budweiser Premium</td><td class="item-size">500ml</td><td class="item-price">&#8377;230</td></tr>
+          <tr><td class="item-name">Kingfisher Imperial Strong</td><td class="item-size">650ml</td><td class="item-price">&#8377;250</td></tr>
+          <tr><td class="item-name">Tuborg Premium Danish Strong</td><td class="item-size">650ml</td><td class="item-price">&#8377;250</td></tr>
+        </table>
+      </div>
     </div>
 
-    <div class="section">
-      <div class="section-title">Wine (Full Bottle Only)</div>
-      <table class="menu-table">
-        <tr class="price-header"><td>Brand</td><td class="item-price">Dine-In</td></tr>
-        <tr><td class="item-name">Jacob's Creek Classic Chardonnay</td><td class="item-price">₹2,200</td></tr>
-        <tr><td class="item-name">Jacob's Creek Classic Shiraz Cabernet</td><td class="item-price">₹2,200</td></tr>
-        <tr><td class="item-name">DIA Red Sparkling</td><td class="item-price">₹1,100</td></tr>
-        <tr><td class="item-name">Kyra Premium Red</td><td class="item-price">₹750</td></tr>
-      </table>
+    <div class="accordion" id="acc-wine">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <span class="accordion-title">Wine (Full Bottle Only)</span>
+        <span class="accordion-arrow">&#9660;</span>
+      </div>
+      <div class="accordion-body">
+        <table class="menu-table">
+          <tr class="price-header"><td>Brand</td><td class="item-price">Dine-In</td></tr>
+          <tr><td class="item-name">Jacob's Creek Classic Chardonnay</td><td class="item-price">&#8377;2,200</td></tr>
+          <tr><td class="item-name">Jacob's Creek Classic Shiraz Cabernet</td><td class="item-price">&#8377;2,200</td></tr>
+          <tr><td class="item-name">DIA Red Sparkling</td><td class="item-price">&#8377;1,100</td></tr>
+          <tr><td class="item-name">Kyra Premium Red</td><td class="item-price">&#8377;750</td></tr>
+        </table>
+      </div>
     </div>
   </div>
 
+  <!-- ══ VODKA & RUM TAB ══ -->
+  <div class="tab-panel" id="tab-vodka-rum">
 
-  <div class="pricing-note" style="margin-top:24px">
+    <!-- DEFAULT OPEN: Rum -->
+    <div class="accordion open" id="acc-rum">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <span class="accordion-title">Rum</span>
+        <span class="accordion-arrow">&#9660;</span>
+      </div>
+      <div class="accordion-body">
+        <table class="menu-table">
+          <tr class="price-header"><td>Brand</td><td class="item-size">30ml</td><td class="item-size">60ml</td><td class="item-price">Bottle</td></tr>
+          <tr><td class="item-name">Old Monk Coffee XO</td><td class="item-size">&#8377;80</td><td class="item-size">&#8377;135</td><td class="item-price">&#8377;1,350</td></tr>
+          <tr><td class="item-name">Bacardi Limon</td><td class="item-size">&#8377;70</td><td class="item-size">&#8377;125</td><td class="item-price">&#8377;1,250</td></tr>
+          <tr><td class="item-name">Bacardi Mango Chilli</td><td class="item-size">&#8377;70</td><td class="item-size">&#8377;125</td><td class="item-price">&#8377;1,250</td></tr>
+          <tr><td class="item-name">Old Monk Matured XXX</td><td class="item-size">&#8377;50</td><td class="item-size">&#8377;75</td><td class="item-price">&#8377;750</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="accordion" id="acc-vodka">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <span class="accordion-title">Vodka</span>
+        <span class="accordion-arrow">&#9660;</span>
+      </div>
+      <div class="accordion-body">
+        <table class="menu-table">
+          <tr class="price-header"><td>Brand</td><td class="item-size">30ml</td><td class="item-size">60ml</td><td class="item-price">Bottle</td></tr>
+          <tr><td class="item-name">Grey Goose</td><td class="item-size">&#8377;220</td><td class="item-size">&#8377;430</td><td class="item-price">&#8377;4,300</td></tr>
+          <tr><td class="item-name">Absolut</td><td class="item-size">&#8377;130</td><td class="item-size">&#8377;245</td><td class="item-price">&#8377;2,450</td></tr>
+          <tr><td class="item-name">Magic Moments (All Flavors)</td><td class="item-size">&#8377;55</td><td class="item-size">&#8377;100</td><td class="item-price">&#8377;1,000</td></tr>
+          <tr><td class="item-name">Magic Moments Pure Grain</td><td class="item-size">&#8377;50</td><td class="item-size">&#8377;90</td><td class="item-price">&#8377;900</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="accordion" id="acc-brandy">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <span class="accordion-title">Brandy</span>
+        <span class="accordion-arrow">&#9660;</span>
+      </div>
+      <div class="accordion-body">
+        <table class="menu-table">
+          <tr class="price-header"><td>Brand</td><td class="item-size">30ml</td><td class="item-size">60ml</td><td class="item-price">Bottle</td></tr>
+          <tr><td class="item-name">Honey Bee Brandy</td><td class="item-size">&#8377;50</td><td class="item-size">&#8377;85</td><td class="item-price">&#8377;850</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="accordion" id="acc-gin">
+      <div class="accordion-header" onclick="toggleAcc(this)">
+        <span class="accordion-title">Gin</span>
+        <span class="accordion-arrow">&#9660;</span>
+      </div>
+      <div class="accordion-body">
+        <table class="menu-table">
+          <tr class="price-header"><td>Brand</td><td class="item-size">30ml</td><td class="item-size">60ml</td><td class="item-price">Bottle</td></tr>
+          <tr><td class="item-name">Bombay Sapphire London Dry Gin</td><td class="item-size">&#8377;160</td><td class="item-size">&#8377;315</td><td class="item-price">&#8377;3,000</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Policy note -->
+  <div class="pricing-note">
     <strong>Liquor Dine-In:</strong> MRP + 20% — Includes Ice, Mixers &amp; Free Chakna &nbsp;|&nbsp;
     <strong>Beer &amp; Breezer Takeaway:</strong> MRP + 10% &nbsp;|&nbsp;
     <strong>Wine:</strong> Full Bottle Only &nbsp;|&nbsp;
@@ -516,7 +434,7 @@
 </div>
 
 <footer>
-  ✦ &nbsp; Please drink responsibly &nbsp; • &nbsp; All prices in INR &nbsp; • &nbsp; Prices subject to change &nbsp; ✦
+  &#x2726; &nbsp; Please drink responsibly &nbsp; &bull; &nbsp; All prices in INR &nbsp; &bull; &nbsp; Prices subject to change &nbsp; &#x2726;
 </footer>
 
 <script>
@@ -528,6 +446,11 @@
     clearSearch();
   }
 
+  function toggleAcc(header) {
+    header.parentElement.classList.toggle('open');
+  }
+
+  // Search
   const searchInput = document.getElementById('searchInput');
   const clearBtn = document.getElementById('clearBtn');
   const searchResults = document.getElementById('searchResults');
@@ -540,10 +463,10 @@
     const tds = tr.querySelectorAll('td');
     const price = tds[tds.length - 1] ? tds[tds.length - 1].textContent.trim() : '';
     const panel = tr.closest('.tab-panel');
-    const sectionEl = tr.closest('.section');
-    const tabMap = { 'tab-food': 'Food', 'tab-whisky': 'Whisky', 'tab-vodka-rum': 'Vodka & Rum', 'tab-beer-wine': 'Beer & Wine' };
+    const acc = tr.closest('.accordion');
+    const tabMap = {'tab-food':'Food','tab-whisky':'Whisky','tab-beer-wine':'Beer & Wine','tab-vodka-rum':'Vodka & Rum'};
     const tabLabel = panel ? (tabMap[panel.id] || '') : '';
-    const section = sectionEl ? (sectionEl.querySelector('.section-title') || {}).textContent || '' : '';
+    const section = acc ? (acc.querySelector('.accordion-title') || {}).textContent || '' : '';
     allItems.push({ name: nameEl.textContent.trim(), bn: bnEl ? bnEl.textContent.trim() : '', price, section: section.trim(), tabLabel });
   });
 
@@ -568,11 +491,12 @@
     });
     let html = '';
     Object.values(groups).forEach(g => {
-      html += `<div class="search-section-label">${g.tabLabel} — ${g.section}</div><table class="menu-table">`;
+      html += '<div class="search-section-label">' + g.tabLabel + (g.section ? ' — ' + g.section : '') + '</div><table class="menu-table">';
       g.items.forEach((item, i) => {
         const bg = i % 2 === 0 ? 'background:var(--gold-pale2)' : '';
-        const hn = item.name.replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), m => `<span class="highlight">${m}</span>`);
-        html += `<tr style="${bg}"><td><span class="item-name">${hn}</span>${item.bn ? `<span class="item-bn">${item.bn}</span>` : ''}</td><td class="item-price">${item.price}</td></tr>`;
+        const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const hn = item.name.replace(new RegExp(escaped, 'gi'), m => '<span class="highlight">' + m + '</span>');
+        html += '<tr style="' + bg + '"><td><span class="item-name">' + hn + '</span>' + (item.bn ? '<span class="item-bn">' + item.bn + '</span>' : '') + '</td><td class="item-price">' + item.price + '</td></tr>';
       });
       html += '</table>';
     });
