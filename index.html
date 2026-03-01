@@ -95,13 +95,13 @@
   .menu-table tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
   .menu-table tr:nth-child(even) { background: var(--gold-pale2); }
   .menu-table tr:hover { background: var(--gold-pale); }
-  .menu-table td { padding: 8px 12px; vertical-align: middle; }
-  .item-name { color: var(--text); font-weight: 500; font-size: 14px; line-height: 1.2; }
-  .item-bn { color: var(--text-light); font-size: 12px; font-family: 'Hind Siliguri', sans-serif; display: block; margin-top: 1px; font-weight: 400; }
-  .item-price { text-align: right; color: var(--navy); font-weight: 700; font-size: 14px; white-space: nowrap; min-width: 55px; }
-  .item-size { text-align: center; color: var(--text-light); font-size: 13px; white-space: nowrap; padding: 8px 8px; }
+  .menu-table td { padding: 12px 14px; vertical-align: middle; }
+  .item-name { color: var(--text); font-weight: 500; font-size: 16px; line-height: 1.45; letter-spacing: 0.2px; }
+  .item-bn { color: var(--text-light); font-size: 14px; font-family: 'Hind Siliguri', sans-serif; display: block; margin-top: 4px; font-weight: 400; letter-spacing: 0.3px; }
+  .item-price { text-align: right; color: var(--navy); font-weight: 700; font-size: 16px; white-space: nowrap; min-width: 62px; letter-spacing: 0.2px; }
+  .item-size { text-align: center; color: var(--text-light); font-size: 14px; white-space: nowrap; padding: 8px 8px; letter-spacing: 0.2px; }
   .price-header { background: var(--navy-dark) !important; }
-  .price-header td { color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 5px 12px; border-bottom: none !important; }
+  .price-header td { color: var(--gold); font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 7px 14px; border-bottom: none !important; }
   .price-header:hover { background: var(--navy-dark) !important; }
 
   /* PRICING NOTE */
@@ -115,10 +115,15 @@
 
   footer { text-align: center; background: var(--navy-dark); color: rgba(201,168,76,0.5); padding: 14px; font-size: 12px; border-top: 2px solid var(--gold); letter-spacing: 1px; }
 
-  @media (max-width: 480px) {
+  @media (max-width: 600px) {
     .tab-btn { font-size: 12px; padding: 11px 14px 10px; letter-spacing: 0.8px; }
-    .menu-table td { padding: 7px 8px; }
-    .item-name { font-size: 13px; }
+    .menu-table td { padding: 13px 10px; }
+    .item-name { font-size: 16px; }
+    .item-bn { font-size: 15px; margin-top: 5px; }
+    .item-price { font-size: 17px; }
+    .item-size { font-size: 14px; }
+    .accordion-title { font-size: 13px; letter-spacing: 1.2px; }
+    .accordion-header { padding: 13px 14px; }
   }
 </style>
 </head>
@@ -450,30 +455,48 @@
     header.parentElement.classList.toggle('open');
   }
 
-  // Search
   const searchInput = document.getElementById('searchInput');
   const clearBtn = document.getElementById('clearBtn');
   const searchResults = document.getElementById('searchResults');
 
+  // Build item index after DOM is ready
   const allItems = [];
-  document.querySelectorAll('.menu-table tr:not(.price-header)').forEach(tr => {
-    const nameEl = tr.querySelector('.item-name');
-    if (!nameEl) return;
-    const bnEl = tr.querySelector('.item-bn');
-    const tds = tr.querySelectorAll('td');
-    const price = tds[tds.length - 1] ? tds[tds.length - 1].textContent.trim() : '';
-    const panel = tr.closest('.tab-panel');
-    const acc = tr.closest('.accordion');
-    const tabMap = {'tab-food':'Food','tab-whisky':'Whisky','tab-beer-wine':'Beer & Wine','tab-vodka-rum':'Vodka & Rum'};
+  const tabMap = {'tab-food':'Food','tab-whisky':'Whisky','tab-beer-wine':'Beer & Wine','tab-vodka-rum':'Vodka & Rum'};
+
+  document.querySelectorAll('.accordion').forEach(acc => {
+    const accTitle = (acc.querySelector('.accordion-title') || {}).textContent || '';
+    const panel = acc.closest('.tab-panel');
     const tabLabel = panel ? (tabMap[panel.id] || '') : '';
-    const section = acc ? (acc.querySelector('.accordion-title') || {}).textContent || '' : '';
-    allItems.push({ name: nameEl.textContent.trim(), bn: bnEl ? bnEl.textContent.trim() : '', price, section: section.trim(), tabLabel });
+    const headerRow = acc.querySelector('.price-header');
+    const headers = headerRow ? Array.from(headerRow.querySelectorAll('td')).map(td => td.textContent.trim()) : [];
+
+    acc.querySelectorAll('.menu-table tr:not(.price-header)').forEach(tr => {
+      const nameEl = tr.querySelector('.item-name');
+      if (!nameEl) return;
+      const bnEl = tr.querySelector('.item-bn');
+      const tds = Array.from(tr.querySelectorAll('td'));
+      // cells[0] = item name only (not including Bengali span text)
+      const cells = tds.map((td, i) => i === 0 ? nameEl.textContent.trim() : td.textContent.trim());
+      allItems.push({
+        name: nameEl.textContent.trim(),
+        bn: bnEl ? bnEl.textContent.trim() : '',
+        cells,
+        headers,
+        section: accTitle.trim(),
+        tabLabel
+      });
+    });
   });
 
   searchInput.addEventListener('input', function() {
     const q = this.value.trim();
     clearBtn.style.display = q ? 'block' : 'none';
-    if (!q) { searchResults.innerHTML = ''; searchResults.classList.remove('visible'); document.querySelectorAll('.tab-panel').forEach(p => p.style.display = ''); return; }
+    if (!q) {
+      searchResults.innerHTML = '';
+      searchResults.classList.remove('visible');
+      document.querySelectorAll('.tab-panel').forEach(p => p.style.display = '');
+      return;
+    }
     doSearch(q);
   });
 
@@ -481,25 +504,56 @@
     const ql = q.toLowerCase();
     document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
     searchResults.classList.add('visible');
+
     const matched = allItems.filter(i => i.name.toLowerCase().includes(ql) || i.bn.includes(q));
-    if (!matched.length) { searchResults.innerHTML = '<div class="no-results">No items found for "' + q + '"</div>'; return; }
+    if (!matched.length) {
+      searchResults.innerHTML = '<div class="no-results">No items found for "' + q + '"</div>';
+      return;
+    }
+
+    // Group by tab + section
     const groups = {};
     matched.forEach(item => {
       const key = item.tabLabel + '|' + item.section;
-      if (!groups[key]) groups[key] = { tabLabel: item.tabLabel, section: item.section, items: [] };
+      if (!groups[key]) groups[key] = { tabLabel: item.tabLabel, section: item.section, headers: item.headers, items: [] };
       groups[key].items.push(item);
     });
+
+    const esc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     let html = '';
+
     Object.values(groups).forEach(g => {
-      html += '<div class="search-section-label">' + g.tabLabel + (g.section ? ' — ' + g.section : '') + '</div><table class="menu-table">';
+      html += '<div class="search-section-label">' + g.tabLabel + (g.section ? ' — ' + g.section : '') + '</div>';
+      html += '<table class="menu-table">';
+
+      // Header row
+      if (g.headers.length > 0) {
+        html += '<tr class="price-header">';
+        g.headers.forEach((h, idx) => {
+          const cls = idx === 0 ? '' : (idx === g.headers.length - 1 ? ' class="item-price"' : ' class="item-size"');
+          html += '<td' + cls + '>' + h + '</td>';
+        });
+        html += '</tr>';
+      }
+
       g.items.forEach((item, i) => {
         const bg = i % 2 === 0 ? 'background:var(--gold-pale2)' : '';
-        const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const hn = item.name.replace(new RegExp(escaped, 'gi'), m => '<span class="highlight">' + m + '</span>');
-        html += '<tr style="' + bg + '"><td><span class="item-name">' + hn + '</span>' + (item.bn ? '<span class="item-bn">' + item.bn + '</span>' : '') + '</td><td class="item-price">' + item.price + '</td></tr>';
+        const hn = item.name.replace(new RegExp(esc, 'gi'), m => '<span class="highlight">' + m + '</span>');
+        html += '<tr style="' + bg + '">';
+        item.cells.forEach((cell, ci) => {
+          if (ci === 0) {
+            html += '<td><span class="item-name">' + hn + '</span>' + (item.bn ? '<span class="item-bn">' + item.bn + '</span>' : '') + '</td>';
+          } else if (ci === item.cells.length - 1) {
+            html += '<td class="item-price">' + cell + '</td>';
+          } else {
+            html += '<td class="item-size">' + cell + '</td>';
+          }
+        });
+        html += '</tr>';
       });
       html += '</table>';
     });
+
     searchResults.innerHTML = html;
   }
 
