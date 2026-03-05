@@ -771,17 +771,19 @@ function submitLogin() {
 
 // ── POPUP QTY SYSTEM ──
 var _popupName = '';
-var _popupSizes = {};
+var _popupSizes = {}; // key -> {price, label}
 
 function popupQtyChange(size, delta) {
-  var price = _popupSizes[size];
-  if (price == null) return;
+  var entry = _popupSizes[size];
+  if (!entry) return;
+  var price = entry.price;
+  var label = entry.label || size;
   var items = getBill();
-  var key = _popupName + '||' + size;
+  var key = _popupName + '||' + label;
   var existing = items.find(function(i) { return i.key === key; });
   if (delta > 0) {
     if (existing) { existing.qty++; }
-    else { items.push({ key: key, name: _popupName, price: price, size: size, qty: 1 }); }
+    else { items.push({ key: key, name: _popupName, price: price, size: label, qty: 1 }); }
   } else {
     if (existing) {
       existing.qty = Math.max(0, existing.qty - 1);
@@ -820,7 +822,8 @@ function refreshPopupQty() {
                  size === 'Half'       ? 'mrpHalf' :
                  size === 'Qtr'        ? 'mrpQtr'  : null;
     if (!prefix) return;
-    var key = _popupName + '||' + size;
+    var entry = _popupSizes[size]; var label = entry ? (entry.label || size) : size;
+    var key = _popupName + '||' + label;
     var found = items.find(function(i) { return i.key === key; });
     var qty = found ? found.qty : 0;
     var addBtn = document.getElementById(prefix + 'Add');
@@ -863,8 +866,8 @@ function showFoodPopup(name) {
   var key = name.toLowerCase().trim();
   var price = lookup(foodData, key);
   var half = price ? Math.ceil((price / 2) / 5) * 5 : null;
-  if (price) _popupSizes['Full plate'] = price;
-  if (half)  _popupSizes['Half plate'] = half;
+  if (price) _popupSizes['Full'] = { price: price, label: 'Full plate' };
+  if (half)  _popupSizes['Half'] = { price: half,  label: 'Half plate' };
 
   document.getElementById('mrpItemName').textContent = name;
   document.getElementById('mrpMrpRow').style.display = 'none';
@@ -906,7 +909,7 @@ function showLiquorPopup(name, size) {
 
     // For beer, Full maps to cartSize
     _popupSizes = {};
-    if (dineIn) _popupSizes['Full'] = dineIn;
+    if (dineIn) _popupSizes['Full'] = { price: dineIn, label: cartSize };
     showRow('mrpFull', !!dineIn);
     hideRow('mrp60ml');
     hideRow('mrpHalf');
@@ -922,7 +925,7 @@ function showLiquorPopup(name, size) {
     if (data) {
       var full = data[0], half = data[1], qtr = data[2];
       var sixtyMl = lookup(ml60Map, key) || Math.ceil((full / 12.5) / 10) * 10;
-      _popupSizes = { 'Full': full, '60ml': sixtyMl, 'Half': half, 'Qtr': qtr };
+      _popupSizes = { 'Full': {price:full,label:'Full'}, '60ml': {price:sixtyMl,label:'60ml'}, 'Half': {price:half,label:'Half'}, 'Qtr': {price:qtr,label:'Qtr'} };
 
       document.getElementById('mrpFull').textContent = fmt(full);
       document.getElementById('mrp60mlRow').style.display = '';
