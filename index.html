@@ -859,6 +859,8 @@ const HIST_KEY = 'royal_bill_history';
 function getBill() { try { return JSON.parse(localStorage.getItem(BILL_KEY)) || []; } catch(e) { return []; } }
 function saveBill(items) { localStorage.setItem(BILL_KEY, JSON.stringify(items)); }
 function getHistory() { try { return JSON.parse(localStorage.getItem(HIST_KEY)) || []; } catch(e) { return []; } }
+function getPending() { try { return JSON.parse(localStorage.getItem('royal_pending_bills')) || []; } catch(e) { return []; } }
+function savePending(p) { localStorage.setItem('royal_pending_bills', JSON.stringify(p)); }
 
 function addToCart(name, price, size) {
   const items = getBill();
@@ -873,12 +875,10 @@ function addToCart(name, price, size) {
 
 function addWater(price) {
   const items = getBill();
-  const key = 'Water \u20b9' + price + '||ea';
+  const key = 'Water ₹' + price + '||ea';
   const existing = items.find(function(i) { return i.key === key; });
-  if (existing) { existing.qty++; } else { items.push({ key: key, name: 'Water', price: price, size: '\u20b9' + price, qty: 1 }); }
-  saveBill(items);
-  renderBillPanel();
-  updateCartBar();
+  if (existing) { existing.qty++; } else { items.push({ key: key, name: 'Water', price: price, size: '₹' + price, qty: 1 }); }
+  saveBill(items); renderBillPanel(); updateCartBar();
 }
 
 function addChakna() {
@@ -886,33 +886,38 @@ function addChakna() {
   const key = 'Chakna||extra';
   const existing = items.find(function(i) { return i.key === key; });
   if (existing) { existing.qty++; } else { items.push({ key: key, name: 'Chakna', price: 20, size: 'extra', qty: 1 }); }
-  saveBill(items);
-  renderBillPanel();
-  updateCartBar();
+  saveBill(items); renderBillPanel(); updateCartBar();
+}
+
+function toggleDiscount() {
+  const row = document.getElementById('discountRow');
+  const btn = document.getElementById('discountToggleBtn');
+  const visible = row.style.display !== 'none';
+  row.style.display = visible ? 'none' : 'block';
+  btn.textContent = visible ? '+ Discount' : '✕ Discount';
+  if (!visible) { document.getElementById('discountInput').focus(); }
 }
 
 function applyDiscount() {
   const gross = getBill().reduce(function(s,i){ return s+(i.price*i.qty); }, 0);
-  const discEl = document.getElementById('discountInput');
-  const disc = discEl ? (parseInt(discEl.value) || 0) : 0;
-  const net = Math.max(0, gross - disc);
-  const netEl = document.getElementById('netTotal');
-  if (netEl) netEl.textContent = fmt(net);
+  const disc = parseInt(document.getElementById('discountInput').value) || 0;
+  document.getElementById('netTotal').textContent = fmt(Math.max(0, gross - disc));
+  showToast('Discount applied');
 }
 
 function updateCartBar() {
   const items = getBill();
   const count = items.reduce(function(s,i) { return s+i.qty; }, 0);
-  const gross = items.reduce(function(s,i) { return s+(i.price*i.qty); }, 0);
-  const discEl2 = document.getElementById('discountInput');
-  const disc = discEl2 ? (parseInt(discEl2.value) || 0) : 0;
-  const total = Math.max(0, gross - disc);
+  const total = items.reduce(function(s,i) { return s+(i.price*i.qty); }, 0);
   const summary = document.getElementById('cartBarSummary');
   const totalEl = document.getElementById('cartBarTotal');
   if (summary) summary.textContent = count > 0 ? count + ' item' + (count===1?'':'s') + ' in bill' : 'Tap any item to add';
   if (totalEl) totalEl.textContent = fmt(total);
   const badge = document.getElementById('cartIconCount');
   if (badge) { if (count > 0) { badge.style.display='block'; badge.textContent=count; } else { badge.style.display='none'; } }
+  // pending badge
+  const pb = document.getElementById('pendingBadge');
+  if (pb) { const pc = getPending().length; pb.style.display = pc?'inline':'none'; pb.textContent=pc; }
 }
 
 function renderBillPanel() {
@@ -922,33 +927,32 @@ function renderBillPanel() {
   if (!items.length) {
     container.innerHTML = '<div style="text-align:center;padding:28px;color:var(--text-light);font-size:14px;">No items — tap any menu item to add</div>';
     document.getElementById('billTotal').textContent = fmt(0);
-    updateCartBar();
-    return;
+    document.getElementById('netTotal').textContent = fmt(0);
+    updateCartBar(); return;
   }
   let total = 0;
   let html = '';
   items.forEach(function(item, idx) {
-    const sub = item.price * item.qty;
-    total += sub;
+    const sub = item.price * item.qty; total += sub;
     html += '<div style="display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);gap:8px;">' +
       '<div style="flex:1;min-width:0;">' +
         '<div style="font-size:14px;font-weight:500;color:var(--text);">' + item.name + '</div>' +
         '<div style="font-size:12px;color:var(--text-light);">' + item.size + ' &nbsp;&middot;&nbsp; ' + fmt(item.price) + ' each</div>' +
       '</div>' +
       '<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">' +
-        '<button onclick="changeQty(' + idx + ',-1)" style="width:28px;height:28px;border:1px solid var(--border);background:#fff;border-radius:3px;font-size:18px;cursor:pointer;line-height:1;color:var(--navy);">\u2212</button>' +
+        '<button onclick="changeQty(' + idx + ',-1)" style="width:28px;height:28px;border:1px solid var(--border);background:#fff;border-radius:3px;font-size:18px;cursor:pointer;line-height:1;color:var(--navy);">−</button>' +
         '<input type="number" value="' + item.qty + '" min="1" onchange="setQty(' + idx + ',this.value)" style="width:40px;text-align:center;border:1px solid var(--border);border-radius:3px;padding:4px;font-size:14px;font-weight:600;color:var(--navy);">' +
         '<button onclick="changeQty(' + idx + ',1)" style="width:28px;height:28px;border:1px solid var(--border);background:#fff;border-radius:3px;font-size:18px;cursor:pointer;line-height:1;color:var(--navy);">+</button>' +
       '</div>' +
       '<div style="min-width:60px;text-align:right;font-weight:700;font-size:15px;color:var(--navy);">' + fmt(sub) + '</div>' +
-      '<button onclick="removeItem(' + idx + ')" style="background:none;border:none;color:#bbb;font-size:18px;cursor:pointer;padding:0 3px;line-height:1;">\u2715</button>' +
+      '<button onclick="removeItem(' + idx + ')" style="background:none;border:none;color:#bbb;font-size:18px;cursor:pointer;padding:0 3px;line-height:1;">✕</button>' +
     '</div>';
   });
   container.innerHTML = html;
   document.getElementById('billTotal').textContent = fmt(total);
   const discEl = document.getElementById('discountInput');
-  const netEl = document.getElementById('netTotal');
-  if (netEl) netEl.textContent = discEl && discEl.value ? fmt(Math.max(0,total-(parseInt(discEl.value)||0))) : fmt(total);
+  const disc = discEl ? (parseInt(discEl.value)||0) : 0;
+  document.getElementById('netTotal').textContent = fmt(Math.max(0, total - disc));
   updateCartBar();
 }
 
@@ -968,56 +972,144 @@ function removeItem(idx) {
   const items = getBill(); items.splice(idx,1); saveBill(items); renderBillPanel();
 }
 
-function markAsPaid() {
+function createBill() {
   const items = getBill();
   if (!items.length) { showToast('Bill is empty'); return; }
-  const gross = items.reduce(function(s,i) { return s+(i.price*i.qty); }, 0);
-  const disc = parseInt((document.getElementById('discountInput')||{}).value) || 0;
-  const total = Math.max(0, gross - disc);
-  const hist = getHistory();
-  hist.unshift({ id: Date.now(), time: new Date().toLocaleString('en-IN'), items: JSON.parse(JSON.stringify(items)), total: total, discount: disc });
-  localStorage.setItem(HIST_KEY, JSON.stringify(hist));
+  const gross = items.reduce(function(s,i){ return s+(i.price*i.qty); }, 0);
+  const discEl = document.getElementById('discountInput');
+  const disc = discEl ? (parseInt(discEl.value)||0) : 0;
+  const net = Math.max(0, gross - disc);
+  const billOnEl = document.getElementById('billOnInput');
+  const billOn = billOnEl ? billOnEl.value.trim() : '';
+  const pending = getPending();
+  pending.unshift({ id: Date.now(), time: new Date().toLocaleString('en-IN'), billOn: billOn, items: JSON.parse(JSON.stringify(items)), gross: gross, discount: disc, net: net, paid: false });
+  savePending(pending);
   localStorage.removeItem(BILL_KEY);
+  if (discEl) discEl.value = '';
+  if (billOnEl) billOnEl.value = '';
+  document.getElementById('discountRow').style.display = 'none';
+  document.getElementById('discountToggleBtn').textContent = '+ Discount';
   renderBillPanel();
-  showToast('Bill paid \u2713');
+  switchBillTab('pending');
+  showToast('Bill created ✓');
+}
+
+function markPaid(id) {
+  const pending = getPending();
+  const bill = pending.find(function(b){ return b.id === id; });
+  if (!bill) return;
+  bill.paid = true;
+  const hist = getHistory();
+  hist.unshift(bill);
+  localStorage.setItem(HIST_KEY, JSON.stringify(hist));
+  savePending(pending.filter(function(b){ return b.id !== id; }));
+  renderPendingBills();
+  updateCartBar();
+  showToast('Marked as paid ✓');
+}
+
+function editPendingBill(id) {
+  const pending = getPending();
+  const bill = pending.find(function(b){ return b.id === id; });
+  if (!bill) return;
+  // Load back into current bill
+  saveBill(bill.items);
+  savePending(pending.filter(function(b){ return b.id !== id; }));
+  renderBillPanel();
+  switchBillTab('current');
+  showToast('Bill loaded for editing');
+}
+
+function deletePendingBill(id) {
+  if (!confirm('Delete this pending bill?')) return;
+  savePending(getPending().filter(function(b){ return b.id !== id; }));
+  renderPendingBills();
+  updateCartBar();
+}
+
+function renderPendingBills() {
+  const pending = getPending();
+  const c = document.getElementById('pendingBillsList');
+  if (!c) return;
+  if (!pending.length) {
+    c.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(201,168,76,0.4);font-size:14px;">No pending bills</div>';
+    return;
+  }
+  c.innerHTML = pending.map(function(bill, bi) {
+    const rows = bill.items.map(function(i) {
+      return '<div style="display:flex;justify-content:space-between;padding:5px 14px;font-size:13px;color:var(--text-light);">' +
+        '<span>' + i.name + ' (' + i.size + ') × ' + i.qty + '</span>' +
+        '<span style="font-weight:600;">' + fmt(i.price * i.qty) + '</span></div>';
+    }).join('');
+    const discRow = bill.discount ? '<div style="display:flex;justify-content:space-between;padding:4px 14px;font-size:12px;color:#c0392b;"><span>Discount</span><span>- ' + fmt(bill.discount) + '</span></div>' : '';
+    return '<div style="background:var(--cream);border:1px solid var(--border);border-radius:4px;margin-bottom:12px;overflow:hidden;">' +
+      '<div style="background:var(--navy);padding:9px 14px;display:flex;justify-content:space-between;align-items:center;">' +
+        '<span style="color:var(--gold-light);font-size:12px;font-weight:600;">#' + (pending.length-bi) + (bill.billOn ? ' &nbsp;&middot;&nbsp; ' + bill.billOn : '') + ' &nbsp;&middot;&nbsp; ' + bill.time + '</span>' +
+        '<span style="color:var(--gold-light);font-weight:700;font-size:16px;">' + fmt(bill.net) + '</span>' +
+      '</div>' +
+      rows + discRow +
+      '<div style="display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);background:var(--gold-pale2);">' +
+        '<button onclick="editPendingBill(' + bill.id + ')" style="flex:1;padding:9px;background:#fff;color:var(--navy);border:1.5px solid var(--border);border-radius:3px;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:0.5px;">&#x270E; Edit</button>' +
+        '<button onclick="deletePendingBill(' + bill.id + ')" style="padding:9px 12px;background:none;color:rgba(200,60,60,0.7);border:1.5px solid rgba(200,60,60,0.3);border-radius:3px;font-size:12px;font-weight:700;cursor:pointer;">&#x1F5D1;</button>' +
+        '<button onclick="markPaid(' + bill.id + ')" style="flex:2;padding:9px;background:var(--navy);color:var(--gold-light);border:none;border-radius:3px;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px;">&#x2714; Mark as Paid</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderHistoryBills() {
+  const hist = getHistory();
+  const c = document.getElementById('billHistoryList');
+  if (!c) return;
+  if (!hist.length) {
+    c.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(201,168,76,0.4);font-size:14px;">No paid bills yet</div>';
+    return;
+  }
+  c.innerHTML = hist.map(function(bill, bi) {
+    const rows = bill.items.map(function(i) {
+      return '<div style="display:flex;justify-content:space-between;padding:5px 14px;font-size:13px;color:var(--text-light);">' +
+        '<span>' + i.name + ' (' + i.size + ') × ' + i.qty + '</span>' +
+        '<span style="font-weight:600;">' + fmt(i.price*i.qty) + '</span></div>';
+    }).join('');
+    const discRow = bill.discount ? '<div style="display:flex;justify-content:space-between;padding:4px 14px;font-size:12px;color:#c0392b;"><span>Discount</span><span>- ' + fmt(bill.discount) + '</span></div>' : '';
+    return '<div style="background:var(--cream);border:1px solid var(--border);border-radius:4px;margin-bottom:12px;overflow:hidden;">' +
+      '<div style="background:var(--navy-dark,#0a1028);padding:9px 14px;display:flex;justify-content:space-between;align-items:center;">' +
+        '<span style="color:var(--gold-light);font-size:12px;font-weight:600;">#' + (hist.length-bi) + (bill.billOn ? ' &nbsp;&middot;&nbsp; ' + bill.billOn : '') + ' &nbsp;&middot;&nbsp; ' + bill.time + ' &nbsp;&#x2714;</span>' +
+        '<span style="color:var(--gold-light);font-weight:700;font-size:16px;">' + fmt(bill.net||bill.total) + '</span>' +
+      '</div>' +
+      rows + discRow + '</div>';
+  }).join('');
+}
+
+function switchBillTab(tab) {
+  ['current','pending','history'].forEach(function(t) {
+    document.getElementById('billPane-' + t).style.display = t===tab ? 'block' : 'none';
+    const btn = document.getElementById('billTab-' + t);
+    btn.style.borderBottomColor = t===tab ? 'var(--gold)' : 'transparent';
+    btn.style.color = t===tab ? 'var(--gold-light)' : 'rgba(201,168,76,0.45)';
+  });
+  if (tab === 'pending') renderPendingBills();
+  if (tab === 'history') renderHistoryBills();
 }
 
 function clearAllData() {
   if (!confirm('Clear all billing data? Cannot be undone.')) return;
   localStorage.removeItem(BILL_KEY);
   localStorage.removeItem(HIST_KEY);
+  localStorage.removeItem('royal_pending_bills');
   renderBillPanel();
+  updateCartBar();
   showToast('All data cleared');
 }
 
 function openBilling() {
   document.getElementById('billingPanel').style.display = 'block';
+  switchBillTab('current');
   renderBillPanel();
 }
 function closeBilling() { document.getElementById('billingPanel').style.display = 'none'; }
-
-function showBillHistory() {
-  const hist = getHistory();
-  const c = document.getElementById('billHistoryList');
-  if (!hist.length) {
-    c.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(201,168,76,0.4);font-size:14px;">No paid bills yet</div>';
-  } else {
-    c.innerHTML = hist.map(function(bill, bi) {
-      const rows = bill.items.map(function(i) {
-        return '<div style="display:flex;justify-content:space-between;padding:5px 14px;font-size:13px;color:rgba(255,255,255,0.65);">' +
-          '<span>' + i.name + ' (' + i.size + ') \xd7 ' + i.qty + '</span>' +
-          '<span>' + fmt(i.price * i.qty) + '</span></div>';
-      }).join('');
-      return '<div style="background:rgba(255,255,255,0.05);border:1px solid rgba(201,168,76,0.2);border-radius:4px;margin-bottom:12px;overflow:hidden;">' +
-        '<div style="background:rgba(201,168,76,0.1);padding:9px 14px;display:flex;justify-content:space-between;align-items:center;">' +
-          '<span style="color:var(--gold-light);font-size:12px;font-weight:600;">#' + (hist.length-bi) + ' &nbsp;&middot;&nbsp; ' + bill.time + '</span>' +
-          '<span style="color:var(--gold-light);font-weight:700;font-size:16px;">' + fmt(bill.total) + (bill.discount ? ' <span style="font-size:11px;opacity:0.6;">(disc: ' + fmt(bill.discount) + ')</span>' : '') + '</span>' +
-        '</div>' + rows + '</div>';
-    }).join('');
-  }
-  document.getElementById('billHistoryPanel').style.display = 'block';
-}
-function closeBillHistory() { document.getElementById('billHistoryPanel').style.display = 'none'; }
+function showBillHistory() { openBilling(); switchBillTab('history'); }
+function closeBillHistory() { closeBilling(); }
 
 function showToast(msg) {
   let t = document.getElementById('toastMsg');
@@ -1162,48 +1254,79 @@ updateCartBar();
 </div>
 
 <!-- Billing Panel -->
-<div id="billingPanel" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(10,16,40,0.96);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 12px 100px;">
+<div id="billingPanel" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(10,16,40,0.96);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 80px;">
   <div style="max-width:520px;margin:0 auto;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
-      <span style="color:var(--gold-light);font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">&#x1F9FE; Bill</span>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <button onclick="showBillHistory()" style="background:none;border:1px solid rgba(201,168,76,0.35);color:rgba(201,168,76,0.8);font-size:12px;padding:7px 14px;cursor:pointer;border-radius:2px;letter-spacing:1px;">&#x1F4CB; History</button>
-        <button onclick="clearAllData()" style="background:none;border:1px solid rgba(220,80,80,0.35);color:rgba(220,80,80,0.8);font-size:12px;padding:7px 14px;cursor:pointer;border-radius:2px;letter-spacing:1px;">&#x1F5D1; Clear</button>
+
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid rgba(201,168,76,0.2);position:sticky;top:0;background:rgba(10,16,40,0.98);z-index:10;">
+      <span style="color:var(--gold-light);font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">&#x1F9FE; Billing</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button onclick="clearAllData()" style="background:none;border:1px solid rgba(220,80,80,0.35);color:rgba(220,80,80,0.8);font-size:11px;padding:6px 12px;cursor:pointer;border-radius:2px;letter-spacing:1px;">&#x1F5D1; Clear</button>
         <button onclick="closeBilling()" style="background:none;border:none;color:rgba(201,168,76,0.6);font-size:26px;cursor:pointer;line-height:1;padding:0 4px;">&#x2715;</button>
       </div>
     </div>
-    <div style="background:var(--cream);border-radius:4px;border:1px solid var(--border);overflow:hidden;">
-      <div style="background:var(--navy-dark);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <span style="color:rgba(201,168,76,0.55);font-size:11px;letter-spacing:1px;text-transform:uppercase;">Quick add:</span>
-        <button onclick="addWater(10)" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);color:var(--gold);font-size:12px;padding:5px 12px;cursor:pointer;border-radius:2px;">&#x1F4A7; Water &#8377;10</button>
-        <button onclick="addWater(20)" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);color:var(--gold);font-size:12px;padding:5px 12px;cursor:pointer;border-radius:2px;">&#x1F4A7; Water &#8377;20</button>
-        <button onclick="addChakna()" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);color:var(--gold);font-size:12px;padding:5px 12px;cursor:pointer;border-radius:2px;">&#x1F372; Chakna +&#8377;20</button>
-      </div>
-      <div id="billItems" style="min-height:80px;"></div>
-      <div style="border-top:2px solid var(--gold);padding:14px 16px;background:var(--gold-pale2);">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-          <span style="font-size:14px;font-weight:700;color:var(--text);letter-spacing:1px;">TOTAL</span>
-          <span id="billTotal" style="font-size:24px;font-weight:700;color:var(--navy);">&#8377;0</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-          <span style="font-size:13px;color:var(--text-light);white-space:nowrap;">Discount &#8377;</span>
-          <input type="number" id="discountInput" min="0" placeholder="0" oninput="applyDiscount()" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:3px;font-size:15px;font-weight:600;color:var(--navy);text-align:center;">
-          <span style="font-size:13px;color:var(--text);font-weight:600;white-space:nowrap;">Net: <span id="netTotal" style="color:var(--navy);font-weight:700;">&#8377;0</span></span>
-        </div>
-        <button onclick="markAsPaid()" style="width:100%;padding:13px;background:var(--navy);color:var(--gold-light);border:none;border-radius:3px;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">&#x2714; Mark as Paid</button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- Bill History Panel -->
-<div id="billHistoryPanel" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(10,16,40,0.97);overflow-y:auto;padding:16px 12px 40px;">
-  <div style="max-width:520px;margin:0 auto;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <span style="color:var(--gold-light);font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">&#x1F4CB; Bill History</span>
-      <button onclick="closeBillHistory()" style="background:none;border:none;color:rgba(201,168,76,0.6);font-size:26px;cursor:pointer;line-height:1;">&#x2715;</button>
+    <!-- Tabs -->
+    <div style="display:flex;border-bottom:2px solid rgba(201,168,76,0.2);background:rgba(10,16,40,0.9);position:sticky;top:53px;z-index:9;">
+      <button id="billTab-current" onclick="switchBillTab('current')" style="flex:1;padding:11px;background:none;border:none;border-bottom:2px solid var(--gold);color:var(--gold-light);font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;margin-bottom:-2px;">Current Bill</button>
+      <button id="billTab-pending" onclick="switchBillTab('pending')" style="flex:1;padding:11px;background:none;border:none;border-bottom:2px solid transparent;color:rgba(201,168,76,0.45);font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;margin-bottom:-2px;">Pending <span id="pendingBadge" style="display:none;background:#e74c3c;color:#fff;border-radius:50%;padding:1px 5px;font-size:10px;"></span></button>
+      <button id="billTab-history" onclick="switchBillTab('history')" style="flex:1;padding:11px;background:none;border:none;border-bottom:2px solid transparent;color:rgba(201,168,76,0.45);font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;margin-bottom:-2px;">History</button>
     </div>
-    <div id="billHistoryList"></div>
+
+    <!-- Current Bill Tab -->
+    <div id="billPane-current" style="padding:12px 14px;">
+      <div style="background:var(--cream);border-radius:4px;border:1px solid var(--border);overflow:hidden;">
+        <!-- Bill On -->
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+          <span style="font-size:12px;color:var(--text-light);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Bill On</span>
+          <input type="text" id="billOnInput" placeholder="Table / Name..." style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:3px;font-size:14px;font-family:'Roboto',sans-serif;color:var(--navy);outline:none;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <!-- Quick add -->
+        <div style="background:rgba(10,16,40,0.06);padding:10px 14px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;border-bottom:1px solid var(--border);">
+          <span style="color:var(--text-light);font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-right:2px;">Add:</span>
+          <button onclick="addWater(10)" style="background:rgba(30,60,130,0.08);border:1px solid rgba(30,60,130,0.2);color:var(--navy);font-size:12px;padding:5px 10px;cursor:pointer;border-radius:2px;">&#x1F4A7; Water &#8377;10</button>
+          <button onclick="addWater(20)" style="background:rgba(30,60,130,0.08);border:1px solid rgba(30,60,130,0.2);color:var(--navy);font-size:12px;padding:5px 10px;cursor:pointer;border-radius:2px;">&#x1F4A7; Water &#8377;20</button>
+          <button onclick="addChakna()" style="background:rgba(30,60,130,0.08);border:1px solid rgba(30,60,130,0.2);color:var(--navy);font-size:12px;padding:5px 10px;cursor:pointer;border-radius:2px;">&#x1F372; Chakna +&#8377;20</button>
+        </div>
+        <!-- Items -->
+        <div id="billItems" style="min-height:80px;"></div>
+        <!-- Discount + Total -->
+        <div style="border-top:2px solid var(--gold);padding:14px 16px;background:var(--gold-pale2);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span style="font-size:13px;color:var(--text-light);">Subtotal</span>
+            <span id="billTotal" style="font-size:16px;font-weight:600;color:var(--navy);">&#8377;0</span>
+          </div>
+          <!-- Discount row -->
+          <div id="discountRow" style="display:none;margin-bottom:10px;padding:10px;background:#fff;border-radius:3px;border:1px solid var(--border);">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+              <span style="font-size:13px;color:var(--text);font-weight:500;white-space:nowrap;">Discount &#8377;</span>
+              <input type="number" id="discountInput" min="0" placeholder="0" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:3px;font-size:16px;font-weight:600;color:var(--navy);text-align:center;outline:none;">
+              <button onclick="applyDiscount()" style="background:var(--navy);color:var(--gold-light);border:none;padding:8px 14px;border-radius:3px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">Apply</button>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:13px;font-weight:700;color:var(--text);">Net Total</span>
+              <span id="netTotal" style="font-size:20px;font-weight:700;color:var(--navy);">&#8377;0</span>
+            </div>
+          </div>
+          <!-- Action buttons -->
+          <div style="display:flex;gap:8px;">
+            <button onclick="toggleDiscount()" id="discountToggleBtn" style="flex:1;padding:11px;background:#fff;color:var(--navy);border:1.5px solid var(--border);border-radius:3px;font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;">+ Discount</button>
+            <button onclick="createBill()" style="flex:2;padding:11px;background:var(--navy);color:var(--gold-light);border:none;border-radius:3px;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">&#x1F4CB; Create Bill</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Bills Tab -->
+    <div id="billPane-pending" style="display:none;padding:12px 14px;">
+      <div id="pendingBillsList"></div>
+    </div>
+
+    <!-- History Tab -->
+    <div id="billPane-history" style="display:none;padding:12px 14px;">
+      <div id="billHistoryList"></div>
+    </div>
+
   </div>
 </div>
 
