@@ -262,13 +262,17 @@
 </div>
 </div>
 </header>
-<div class="search-wrap">
+<div class="search-wrap" style="display:flex;align-items:center;">
 <span id="empDot" style="display:none;position:absolute;left:10px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:#2ecc71;border-radius:50%;box-shadow:0 0 6px rgba(46,204,113,0.7);z-index:10;"></span>
 <div class="search-inner">
 <input autocomplete="off" id="searchInput" placeholder="Search menu items..." type="text"/>
 <button id="clearBtn" onclick="clearSearch()">✕</button>
 <span class="search-icon">⌕</span>
 </div>
+<button id="cartIconBtn" onclick="openBilling()" style="display:none;background:none;border:none;color:var(--gold);font-size:22px;cursor:pointer;padding:0 14px;position:relative;flex-shrink:0;line-height:1;">
+  🛒
+  <span id="cartIconCount" style="display:none;position:absolute;top:2px;right:6px;background:#e74c3c;color:#fff;border-radius:50%;width:17px;height:17px;font-size:10px;font-weight:700;line-height:17px;text-align:center;"></span>
+</button>
 </div>
 <div class="tabs-wrap">
 <div class="tabs">
@@ -555,483 +559,566 @@
 
 </footer>
 <script>
-  // ── MRP DATA [dine-in, half, quarter] ──
-  const mrpData = {
-    "antiquity blue ultra premium": [1500, 750, 380],
-    "blenders pride reserve collection": [1500, 750, 380],
-    "signature premier grain whisky": [1250, 630, 320],
-    "blenders pride ultra premium": [1250, 630, 320],
-    "royal stag superior": [1000, 500, 250],
-    "royal challenge premium gold": [1000, 500, 250],
-    "sterling reserve b7": [950, 480, 240],
-    "mcdowell's no.1 luxury blended": [900, 450, 230],
-    "imperial blue superior grain": [850, 430, 220],
-    "mcdowell's no.1 superior": [850, 430, 220],
-    "johnnie walker gold label reserve": [6050, 3030, 1520],
-    "glenfiddich 12 yo": [5250, 2630, 1320],
-    "johnnie walker double black": [4950, 2480, 1240],
-    "johnnie walker black label": [3950, 1980, 990],
-    "chivas regal 12": [3950, 1980, 990],
-    "jack daniel's": [3950, 1980, 990],
-    "teachers 50": [3150, 1580, 790],
-    "black dog triple gold reserve": [3150, 1580, 790],
-    "ballantine's finest": [2500, 1250, 630],
-    "johnnie walker red label": [2500, 1250, 630],
-    "jim beam kentucky bourbon": [2400, 1200, 600],
-    "black dog centenary black reserve": [2250, 1130, 570],
-    "vat 69": [2150, 1080, 540],
-    "black & white blended scotch": [2350, 1180, 590],
-    "seagrams 100 pipers deluxe scotch": [2350, 1180, 590],
-    "teachers highland cream": [2350, 1180, 590],
-    "jameson irish whiskey": [2700, 1350, 680],
-    "old monk coffee xo": [1350, 680, 340],
-    "bacardi limon": [1250, 630, 320],
-    "bacardi mango chilli": [1250, 630, 320],
-    "old monk matured xxx": [750, 380, 190],
-    "grey goose": [4300, 2150, 1080],
-    "absolut": [2450, 1230, 620],
-    "magic moments (all flavors)": [1000, 500, 250],
-    "magic moments pure grain": [900, 450, 230],
-    "honey bee brandy": [850, 430, 220],
-    "bombay sapphire london dry gin": [3000, 1500, 750],
-    "jacob's creek classic chardonnay": [2200, 1100, 550],
-    "jacob's creek classic shiraz cabernet": [2200, 1100, 550],
-    "dia red sparkling": [1100, 550, 280],
-    "kyra premium red": [750, 380, 190],
-  };
+// ── DATA ──
+const mrpData = {
+  "antiquity blue ultra premium": [1500, 750, 380],
+  "blenders pride reserve collection": [1500, 750, 380],
+  "signature premier grain whisky": [1250, 630, 320],
+  "blenders pride ultra premium": [1250, 630, 320],
+  "royal stag superior": [1000, 500, 250],
+  "royal challenge premium gold": [1000, 500, 250],
+  "sterling reserve b7": [950, 480, 240],
+  "mcdowell's no.1 luxury blended": [900, 450, 230],
+  "imperial blue superior grain": [850, 430, 220],
+  "mcdowell's no.1 superior": [850, 430, 220],
+  "johnnie walker gold label reserve": [6050, 3030, 1520],
+  "glenfiddich 12 yo": [5250, 2630, 1320],
+  "johnnie walker double black": [4950, 2480, 1240],
+  "johnnie walker black label": [3950, 1980, 990],
+  "chivas regal 12": [3950, 1980, 990],
+  "jack daniel's": [3950, 1980, 990],
+  "teachers 50": [3150, 1580, 790],
+  "black dog triple gold reserve": [3150, 1580, 790],
+  "ballantine's finest": [2500, 1250, 630],
+  "johnnie walker red label": [2500, 1250, 630],
+  "jim beam kentucky bourbon": [2400, 1200, 600],
+  "black dog centenary black reserve": [2250, 1130, 570],
+  "vat 69": [2150, 1080, 540],
+  "black & white blended scotch": [2350, 1180, 590],
+  "seagrams 100 pipers deluxe scotch": [2350, 1180, 590],
+  "teachers highland cream": [2350, 1180, 590],
+  "jameson irish whiskey": [2700, 1350, 680],
+  "old monk coffee xo": [1350, 680, 340],
+  "bacardi limon": [1250, 630, 320],
+  "bacardi mango chilli": [1250, 630, 320],
+  "old monk matured xxx": [750, 380, 190],
+  "grey goose": [4300, 2150, 1080],
+  "absolut": [2450, 1230, 620],
+  "magic moments (all flavors)": [1000, 500, 250],
+  "magic moments pure grain": [900, 450, 230],
+  "honey bee brandy": [850, 430, 220],
+  "bombay sapphire london dry gin": [3000, 1500, 750],
+  "jacob's creek classic chardonnay": [2200, 1100, 550],
+  "jacob's creek classic shiraz cabernet": [2200, 1100, 550],
+  "dia red sparkling": [1100, 550, 280],
+  "kyra premium red": [750, 380, 190]
+};
 
+const bevcoMrp = {
+  "antiquity blue ultra premium": 1190, "blenders pride reserve collection": 1220,
+  "signature premier grain whisky": 1020, "blenders pride ultra premium": 1020,
+  "royal stag superior": 800, "royal challenge premium gold": 800,
+  "sterling reserve b7": 780, "mcdowell's no.1 luxury blended": 710,
+  "imperial blue superior grain": 670, "mcdowell's no.1 superior": 670,
+  "johnnie walker gold label reserve": 5020, "glenfiddich 12 yo": 4360,
+  "johnnie walker double black": 4120, "johnnie walker black label": 3290,
+  "chivas regal 12": 3270, "jack daniel's": 3270,
+  "teachers 50": 2590, "black dog triple gold reserve": 2550,
+  "ballantine's finest": 2040, "johnnie walker red label": 2050,
+  "jim beam kentucky bourbon": 1980, "black dog centenary black reserve": 1840,
+  "vat 69": 1790, "black & white blended scotch": 1920,
+  "seagrams 100 pipers deluxe scotch": 1940, "teachers highland cream": 1920,
+  "jameson irish whiskey": 2230, "old monk coffee xo": 1120,
+  "bacardi limon": 1020, "bacardi mango chilli": 1020,
+  "old monk matured xxx": 620, "grey goose": 3570, "absolut": 2020,
+  "magic moments (all flavors)": 800, "magic moments pure grain": 710,
+  "honey bee brandy": 680, "bombay sapphire london dry gin": 2490,
+  "jacob's creek classic chardonnay": 1200, "jacob's creek classic shiraz cabernet": 1200,
+  "dia red sparkling": 590, "kyra premium red": 400
+};
 
-  // ── FOOD DATA [dine-in price] ──
-  const foodData = {
-    "chilly chicken dry": 200, "chicken dry fry": 200, "chicken pakora": 180,
-    "chicken 65": 200, "paneer 65": 180, "paneer pakora": 150,
-    "fish fry (1 pc)": 60, "veg pakora": 80, "egg pakora": 60,
-    "onion pakora": 60, "masala omelette": 60, "papar fry": 40, "papar dry": 20,
-    "butter paneer": 200, "kadai paneer": 180, "chilly paneer": 160,
-    "chicken kosha": 200, "chicken butter masala": 250, "kadai chicken": 220,
-    "chilly chicken": 220, "mutton kosha": 380, "mutton curry": 300,
-    "chana masala": 50, "peanut masala": 60, "green salad": 60,
-    "roti": 10, "butter roti": 15, "plain rice (basmati)": 60,
-  };
+const beerMrpMap = {
+  "kingfisher imperial strong 650ml": 160, "kingfisher imperial strong": 160,
+  "tuborg premium danish strong 650ml": 160, "tuborg premium danish strong": 160,
+  "carlsberg elephant premium pilsner 650ml": 190, "carlsberg elephant premium pilsner": 190,
+  "budweiser premium king of beers 500ml": 130, "budweiser premium king of beers 650ml": 170, "budweiser premium king of beers": 170,
+  "budweiser magnum strong 500ml": 150, "budweiser magnum strong 650ml": 200, "budweiser magnum strong": 200,
+  "corona extra premium lager 330ml": 200, "corona extra premium lager": 200,
+  "bacardi breezer (all flavours) 275ml": 100, "bacardi breezer (all flavours)": 100
+};
+const beerDineIn = {
+  "kingfisher imperial strong 650ml": 200, "tuborg premium danish strong 650ml": 200,
+  "carlsberg elephant premium pilsner 650ml": 230,
+  "budweiser premium king of beers 500ml": 160, "budweiser premium king of beers 650ml": 210,
+  "budweiser magnum strong 500ml": 185, "budweiser magnum strong 650ml": 240,
+  "corona extra premium lager 330ml": 240, "bacardi breezer (all flavours) 275ml": 120,
+  "kingfisher imperial strong": 200, "tuborg premium danish strong": 200,
+  "carlsberg elephant premium pilsner": 230, "budweiser premium king of beers": 210,
+  "budweiser magnum strong": 240, "corona extra premium lager": 240,
+  "bacardi breezer (all flavours)": 120
+};
+const ml60Map = {
+  "antiquity blue ultra premium": 150, "blenders pride reserve collection": 150,
+  "signature premier grain whisky": 125, "blenders pride ultra premium": 125,
+  "royal stag superior": 100, "royal challenge premium gold": 100,
+  "sterling reserve b7": 95, "mcdowell's no.1 luxury blended": 90,
+  "imperial blue superior grain": 85, "mcdowell's no.1 superior": 85,
+  "johnnie walker gold label reserve": 605, "glenfiddich 12 yo": 565,
+  "johnnie walker double black": 495, "johnnie walker black label": 395,
+  "chivas regal 12": 395, "jack daniel's": 395,
+  "teachers 50": 315, "black dog triple gold reserve": 315,
+  "ballantine's finest": 245, "johnnie walker red label": 245,
+  "jim beam kentucky bourbon": 240, "black dog centenary black reserve": 225,
+  "vat 69": 215, "black & white blended scotch": 235,
+  "seagrams 100 pipers deluxe scotch": 235, "teachers highland cream": 235,
+  "jameson irish whiskey": 270, "old monk coffee xo": 135,
+  "bacardi limon": 125, "bacardi mango chilli": 125,
+  "old monk matured xxx": 75, "grey goose": 430, "absolut": 245,
+  "magic moments (all flavors)": 100, "magic moments pure grain": 90,
+  "honey bee brandy": 85, "bombay sapphire london dry gin": 315
+};
 
+const foodData = {
+  "chilly chicken dry": 200, "chicken dry fry": 200, "chicken pakora": 180,
+  "chicken 65": 200, "paneer 65": 180, "paneer pakora": 150,
+  "fish fry (1 pc)": 60, "veg pakora": 80, "egg pakora": 60,
+  "onion pakora": 60, "masala omelette": 60, "papar fry": 40, "papar dry": 20,
+  "butter paneer": 200, "kadai paneer": 180, "chilly paneer": 160,
+  "chicken kosha": 200, "chicken butter masala": 250, "kadai chicken": 220,
+  "chilly chicken": 220, "mutton kosha": 380, "mutton curry": 300,
+  "chana masala": 50, "peanut masala": 60, "green salad": 60,
+  "roti": 10, "butter roti": 15, "plain rice (basmati)": 60
+};
 
-  // ── ACTUAL BEVCO MRP (for display alongside dine-in) ──
-  const bevcoMrp = {
-    "antiquity blue ultra premium": 1190, "blenders pride reserve collection": 1220,
-    "signature premier grain whisky": 1020, "blenders pride ultra premium": 1020,
-    "royal stag superior": 800, "royal challenge premium gold": 800,
-    "sterling reserve b7": 780, "mcdowell's no.1 luxury blended": 710,
-    "imperial blue superior grain": 670, "mcdowell's no.1 superior": 670,
-    "johnnie walker gold label reserve": 5020, "glenfiddich 12 yo": 4360,
-    "johnnie walker double black": 4120, "johnnie walker black label": 3290,
-    "chivas regal 12": 3270, "jack daniel's": 3270,
-    "teachers 50": 2590, "black dog triple gold reserve": 2550,
-    "ballantine's finest": 2040, "johnnie walker red label": 2050,
-    "jim beam kentucky bourbon": 1980, "black dog centenary black reserve": 1840,
-    "vat 69": 1790, "black & white blended scotch": 1920,
-    "seagrams 100 pipers deluxe scotch": 1940, "teachers highland cream": 1920,
-    "jameson irish whiskey": 2230, "old monk coffee xo": 1120,
-    "bacardi limon": 1020, "bacardi mango chilli": 1020,
-    "old monk matured xxx": 620, "grey goose": 3570, "absolut": 2020,
-    "magic moments (all flavors)": 800, "magic moments pure grain": 710,
-    "honey bee brandy": 680, "bombay sapphire london dry gin": 2490,
-    "jacob's creek classic chardonnay": 1200, "jacob's creek classic shiraz cabernet": 1200,
-    "dia red sparkling": 590, "kyra premium red": 400,
-  };
+const beerKeys = ['kingfisher','tuborg','carlsberg','budweiser','corona','breezer'];
 
-  const beerKeys = ['kingfisher','tuborg','carlsberg','budweiser','corona','breezer'];
+// ── HELPERS ──
+function lookup(dict, key) {
+  if (dict[key] !== undefined) return dict[key];
+  for (const k in dict) { if (key.includes(k) || k.includes(key)) return dict[k]; }
+  return null;
+}
+function fmt(n) { return '\u20b9' + Number(n).toLocaleString('en-IN'); }
 
-  // ── TAB SWITCHING ──
-  function switchTab(id, btn) {
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + id).classList.add('active');
-    btn.classList.add('active');
-    clearSearch();
+// ── TABS ──
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  clearSearch();
+}
+function toggleAcc(header) { header.parentElement.classList.toggle('open'); }
+
+// ── AUTH ──
+const EMP_KEY = 'royal_emp_auth';
+function isLoggedIn() { return localStorage.getItem(EMP_KEY) === 'true'; }
+
+function initAuth() {
+  if (parseInt(localStorage.getItem('royal_emp_attempts') || '0') >= 5) {
+    const b = document.getElementById('empLoginBtn');
+    if (b) b.style.display = 'none';
   }
-  function toggleAcc(header) { header.parentElement.classList.toggle('open'); }
+  if (isLoggedIn()) showLoggedIn();
+}
 
-  // ── AUTH ──
-  const EMP_KEY = 'royal_emp_auth';
-  function isLoggedIn() { return localStorage.getItem(EMP_KEY) === 'true'; }
-  function initAuth() { if (isLoggedIn()) showLoggedIn(); }
-  function showLoggedIn() {
-    const btn = document.getElementById('empLoginBtn');
-    const status = document.getElementById('empStatus');
-    const dot = document.getElementById('empDot');
-    const bar = document.getElementById('cartBar');
-    if (btn) btn.style.display = 'none';
-    if (status) status.style.display = 'inline';
-    if (dot) dot.style.display = 'block';
-    if (bar) bar.style.display = 'block';
-    renderBill();
-  }
-  function openLoginPopup() {
-    document.getElementById('loginOverlay').style.display = 'flex';
-    document.getElementById('loginPwInput').value = '';
-    document.getElementById('loginError').textContent = '';
-    setTimeout(() => document.getElementById('loginPwInput').focus(), 100);
-  }
-  function closeLoginPopup() { document.getElementById('loginOverlay').style.display = 'none'; }
-  let attempts = parseInt(localStorage.getItem('royal_emp_attempts') || '0');
-  function submitLogin() {
-    const val = document.getElementById('loginPwInput').value;
-    if (val === '12353') {
-      localStorage.setItem(EMP_KEY, 'true');
-      localStorage.removeItem('royal_emp_attempts');
-      closeLoginPopup();
-      showLoggedIn();
-    } else {
-      attempts++;
-      localStorage.setItem('royal_emp_attempts', attempts);
-      const rem = 5 - attempts;
-      if (rem <= 0) { closeLoginPopup(); document.getElementById('empLoginBtn').style.display='none'; }
-      else { document.getElementById('loginError').textContent = 'Incorrect. ' + rem + ' attempt' + (rem===1?'':'s') + ' remaining.'; document.getElementById('loginPwInput').value=''; document.getElementById('loginPwInput').focus(); }
+function showLoggedIn() {
+  const el = (id) => document.getElementById(id);
+  if (el('empLoginBtn')) el('empLoginBtn').style.display = 'none';
+  if (el('empStatus'))   el('empStatus').style.display = 'inline';
+  if (el('empDot'))      el('empDot').style.display = 'block';
+  if (el('cartBar'))     el('cartBar').style.display = 'block';
+  if (el('cartIconBtn')) el('cartIconBtn').style.display = 'block';
+  if (el('cartIconBtn')) el('cartIconBtn').style.display = 'block';
+  if (el('cartIconBtn')) el('cartIconBtn').style.display = 'block';
+  updateCartBar();
+}
+
+function openLoginPopup() {
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('loginPwInput').value = '';
+  document.getElementById('loginError').textContent = '';
+  setTimeout(() => document.getElementById('loginPwInput').focus(), 100);
+}
+function closeLoginPopup() { document.getElementById('loginOverlay').style.display = 'none'; }
+
+function submitLogin() {
+  const val = document.getElementById('loginPwInput').value;
+  if (val === '12353') {
+    localStorage.setItem(EMP_KEY, 'true');
+    localStorage.removeItem('royal_emp_attempts');
+    closeLoginPopup();
+    showLoggedIn();
+  } else {
+    let att = parseInt(localStorage.getItem('royal_emp_attempts') || '0') + 1;
+    localStorage.setItem('royal_emp_attempts', att);
+    const rem = 5 - att;
+    if (rem <= 0) { closeLoginPopup(); document.getElementById('empLoginBtn').style.display = 'none'; }
+    else {
+      document.getElementById('loginError').textContent = 'Incorrect. ' + rem + ' attempt' + (rem===1?'':'s') + ' left.';
+      document.getElementById('loginPwInput').value = '';
+      document.getElementById('loginPwInput').focus();
     }
   }
+}
 
-  // ── MRP POPUP ──
-  let currentPopupItem = null;
-  function showItemPopup(name, isFood) {
-    if (isFood) { showFoodPopup(name); return; }
-    showMrpPopup(name);
+// ── ITEM POPUP ──
+function showItemPopup(name, isFood, size) {
+  if (!isLoggedIn()) return;
+  if (isFood) { showFoodPopup(name); } else { showLiquorPopup(name, size); }
+}
+
+function showFoodPopup(name) {
+  const key = name.toLowerCase().trim();
+  const price = lookup(foodData, key);
+  document.getElementById('mrpItemName').textContent = name;
+  document.getElementById('mrpMrpRow').style.display = 'none';
+  document.getElementById('mrpFullLabel').textContent = 'Full Plate';
+  document.getElementById('mrpFull').textContent = price ? fmt(price) : '—';
+  document.getElementById('mrp60mlRow').style.display = 'none';
+  const half = price ? Math.ceil((price / 2) / 5) * 5 : null;
+  document.getElementById('mrpHalfRow').style.display = half ? 'flex' : 'none';
+  document.getElementById('mrpHalfLabel').textContent = 'Half Plate';
+  document.getElementById('mrpHalf').textContent = half ? fmt(half) : '';
+  document.getElementById('mrpQtrRow').style.display = 'none';
+  const cb = document.getElementById('cartBtns');
+  cb.innerHTML = '';
+  if (half) {
+    const halfBtn = document.createElement('button');
+    halfBtn.className = 'cart-add-btn';
+    halfBtn.textContent = '+ Half ' + fmt(half);
+    halfBtn.onclick = function() { addToCart(name, half, 'Half plate'); };
+    cb.appendChild(halfBtn);
   }
+  if (price) {
+    const btn = document.createElement('button');
+    btn.className = 'cart-add-btn';
+    btn.textContent = '+ Full ' + fmt(price);
+    btn.onclick = function() { addToCart(name, price, 'Full plate'); };
+    cb.appendChild(btn);
+  }
+  document.getElementById('mrpOverlay').style.display = 'flex';
+}
 
-  function showFoodPopup(name) {
-    if (!isLoggedIn()) return;
-    const key = name.toLowerCase().trim();
-    let price = foodData[key];
-    if (!price) { for (const k in foodData) { if (key.includes(k)||k.includes(key)) { price=foodData[k]; break; } } }
-    document.getElementById('mrpItemName').textContent = name;
-    document.getElementById('mrpFullLabel').textContent = 'Dine-In Price';
-    document.getElementById('mrpFull').textContent = price ? '\u20b9' + price : '—';
+function showLiquorPopup(name, size) {
+  const key = name.toLowerCase().trim();
+  const data = lookup(mrpData, key);
+  const isBeer = beerKeys.some(b => key.includes(b));
+  document.getElementById('mrpItemName').textContent = name;
+  const cb = document.getElementById('cartBtns');
+  cb.innerHTML = '';
+
+  if (isBeer) {
+    const beerMrp = (size && beerMrpMap[key + ' ' + size]) ? beerMrpMap[key + ' ' + size] : lookup(beerMrpMap, key);
+    const dineIn = (size && beerDineIn[key + ' ' + size]) ? beerDineIn[key + ' ' + size] : lookup(beerDineIn, key);
+    document.getElementById('mrpMrpRow').style.display = beerMrp ? 'flex' : 'none';
+    document.getElementById('mrpMrpVal').textContent = beerMrp ? fmt(beerMrp) : '';
+    document.getElementById('mrpFullLabel').textContent = 'Dine-In (Per Bottle)';
+    document.getElementById('mrpFull').textContent = dineIn ? fmt(dineIn) : '—';
     document.getElementById('mrp60mlRow').style.display = 'none';
     document.getElementById('mrpHalfRow').style.display = 'none';
     document.getElementById('mrpQtrRow').style.display = 'none';
-    const safeName = name.replace(/'/g, "\\'");
-    document.getElementById('cartBtns').innerHTML = price
-      ? '<button class="cart-add-btn" onclick="addToCart(\''+safeName+'\','+price+',\'1 plate\')">+ Add \u20b9'+price+'</button>' : '';
-    document.getElementById('mrpOverlay').style.display = 'flex';
-  }
-
-  function showMrpPopup(name) {
-    if (!isLoggedIn()) return;
-    const key = name.toLowerCase().trim();
-    let data = mrpData[key];
-    if (!data) { for (const k in mrpData) { if (key.includes(k)||k.includes(key)) { data=mrpData[k]; break; } } }
-    const isBeer = beerKeys.some(b => key.includes(b));
-    currentPopupItem = { name, isBeer, data };
-
-    document.getElementById('mrpItemName').textContent = name;
-    // Show actual BEVCO MRP (strikethrough)
-    let realMrp = bevcoMrp[key];
-    if (!realMrp) { for (const k in bevcoMrp) { if (key.includes(k)||k.includes(key)) { realMrp=bevcoMrp[k]; break; } } }
-    if (realMrp && !isBeer) {
-      document.getElementById('mrpMrpRow').style.display = 'flex';
-      document.getElementById('mrpMrpVal').textContent = '\u20b9' + realMrp.toLocaleString('en-IN');
-    } else {
-      document.getElementById('mrpMrpRow').style.display = 'none';
+    if (dineIn) {
+      const btn = document.createElement('button');
+      btn.className = 'cart-add-btn';
+      const cartSize = size || 'Bottle';
+      btn.textContent = '+ Add ' + fmt(dineIn) + ' (' + cartSize + ')';
+      btn.onclick = function() { addToCart(name, dineIn, cartSize); };
+      cb.appendChild(btn);
     }
-
-    if (isBeer) {
-      const beerMrpMap = {
-        'kingfisher imperial strong': 160, 'tuborg premium danish strong': 160,
-        'carlsberg elephant premium pilsner': 190, 'budweiser premium king of beers': 170,
-        'budweiser magnum strong': 200, 'corona extra premium lager': 200,
-        'bacardi breezer (all flavours)': 100
-      };
-      let beerMrp = null;
-      for (const k in beerMrpMap) { if (key.includes(k.split(' ')[0]) && key.includes(k.split(' ')[1]||'')) { beerMrp = beerMrpMap[k]; break; } }
-      if (!beerMrp) { for (const k in beerMrpMap) { if (key.includes(k.substring(0,10))) { beerMrp=beerMrpMap[k]; break; } } }
-      document.getElementById('mrpFullLabel').textContent = 'MRP (Per Bottle)';
-      document.getElementById('mrpFull').textContent = beerMrp ? '₹' + beerMrp : '—';
-      document.getElementById('mrp60mlRow').style.display = 'none';
-      document.getElementById('mrpHalfRow').style.display = 'none';
-      document.getElementById('mrpQtrRow').style.display = 'none';
-      // Cart buttons for beer - just dine-in price
-      const dineIn = data ? data[0] : null;
-      const btns = document.getElementById('cartBtns');
-      btns.innerHTML = dineIn ? `<button class="cart-add-btn" onclick="addToCart('${name.replace(/'/g,"\\'")}',${dineIn},'Per Bottle')">+ Add ₹${dineIn}</button>` : '';
-    } else if (data) {
+  } else {
+    const realMrp = lookup(bevcoMrp, key);
+    document.getElementById('mrpMrpRow').style.display = realMrp ? 'flex' : 'none';
+    document.getElementById('mrpMrpVal').textContent = realMrp ? fmt(realMrp) : '';
+    document.getElementById('mrpFullLabel').textContent = 'Dine-In (Full Bottle)';
+    if (data) {
       const [full, half, qtr] = data;
-      const sixtyMl = Math.ceil((full / 12.5) / 10) * 10;
-      document.getElementById('mrpFullLabel').textContent = 'Dine-In (Full Bottle)';
-      document.getElementById('mrpFull').textContent = '₹' + full.toLocaleString('en-IN');
+      const sixtyMl = lookup(ml60Map, key) || Math.ceil((full / 12.5) / 10) * 10;
+      document.getElementById('mrpFull').textContent = fmt(full);
       document.getElementById('mrp60mlRow').style.display = 'flex';
-      document.getElementById('mrp60ml').textContent = '₹' + sixtyMl.toLocaleString('en-IN');
+      document.getElementById('mrp60ml').textContent = fmt(sixtyMl);
       document.getElementById('mrpHalfRow').style.display = 'flex';
-      document.getElementById('mrpHalf').textContent = '₹' + half.toLocaleString('en-IN');
+      document.getElementById('mrpHalfLabel').textContent = 'Half Bottle';
+      document.getElementById('mrpHalf').textContent = fmt(half);
       document.getElementById('mrpQtrRow').style.display = 'flex';
-      document.getElementById('mrpQtr').textContent = '₹' + qtr.toLocaleString('en-IN');
-      const safeName = name.replace(/'/g,"\\'");
-      document.getElementById('cartBtns').innerHTML =
-        `<button class="cart-add-btn" onclick="addToCart('${safeName}',${sixtyMl},'60ml')">+ 60ml ₹${sixtyMl}</button>` +
-        `<button class="cart-add-btn" onclick="addToCart('${safeName}',${half},'Half')">+ Half ₹${half}</button>` +
-        `<button class="cart-add-btn" onclick="addToCart('${safeName}',${qtr},'Qtr')">+ Qtr ₹${qtr}</button>` +
-        `<button class="cart-add-btn" onclick="addToCart('${safeName}',${full},'Full')">+ Full ₹${full.toLocaleString('en-IN')}</button>`;
+      document.getElementById('mrpQtr').textContent = fmt(qtr);
+      const sizes = [['60ml', sixtyMl], ['Half', half], ['Qtr', qtr], ['Full', full]];
+      sizes.forEach(function(s) {
+        const btn = document.createElement('button');
+        btn.className = 'cart-add-btn';
+        btn.textContent = '+ ' + s[0] + ' ' + fmt(s[1]);
+        btn.onclick = (function(n, p, sz) { return function() { addToCart(n, p, sz); }; })(name, s[1], s[0]);
+        cb.appendChild(btn);
+      });
     } else {
-      document.getElementById('mrpFullLabel').textContent = 'MRP';
       document.getElementById('mrpFull').textContent = '—';
       document.getElementById('mrp60mlRow').style.display = 'none';
       document.getElementById('mrpHalfRow').style.display = 'none';
       document.getElementById('mrpQtrRow').style.display = 'none';
-      document.getElementById('cartBtns').innerHTML = '';
     }
-    document.getElementById('mrpOverlay').style.display = 'flex';
   }
-  function closeMrpPopup() { document.getElementById('mrpOverlay').style.display = 'none'; }
+  document.getElementById('mrpOverlay').style.display = 'flex';
+}
 
-  // ── BILLING ──
-  const BILL_KEY = 'royal_current_bill';
-  const HISTORY_KEY = 'royal_bill_history';
+function closeMrpPopup() { document.getElementById('mrpOverlay').style.display = 'none'; }
 
-  function getCurrentBill() {
-    try { return JSON.parse(localStorage.getItem(BILL_KEY)) || []; } catch(e) { return []; }
-  }
-  function saveBill(items) { localStorage.setItem(BILL_KEY, JSON.stringify(items)); }
-  function getBillHistory() {
-    try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e) { return []; }
-  }
+// ── BILLING ──
+const BILL_KEY = 'royal_current_bill';
+const HIST_KEY = 'royal_bill_history';
 
-  function addToCart(name, price, size) {
-    const items = getCurrentBill();
-    const key = name + '||' + size;
-    const existing = items.find(i => i.key === key);
-    if (existing) { existing.qty++; }
-    else { items.push({ key, name, price, size, qty: 1 }); }
-    saveBill(items);
-    updateFabCount();
-    closeMrpPopup();
-    // flash feedback
-    showToast(name + ' (' + size + ') added');
-  }
+function getBill() { try { return JSON.parse(localStorage.getItem(BILL_KEY)) || []; } catch(e) { return []; } }
+function saveBill(items) { localStorage.setItem(BILL_KEY, JSON.stringify(items)); }
+function getHistory() { try { return JSON.parse(localStorage.getItem(HIST_KEY)) || []; } catch(e) { return []; } }
 
-  function addWater(price) {
-    const items = getCurrentBill();
-    const label = 'Water (₹' + price + ')';
-    const key = label + '||per';
-    const existing = items.find(i => i.key === key);
-    if (existing) { existing.qty++; }
-    else { items.push({ key, name: label, price, size: 'per', qty: 1 }); }
-    saveBill(items);
-    renderBill();
-    updateFabCount();
-  }
+function addToCart(name, price, size) {
+  const items = getBill();
+  const key = name + '||' + size;
+  const existing = items.find(function(i) { return i.key === key; });
+  if (existing) { existing.qty++; } else { items.push({ key: key, name: name, price: price, size: size, qty: 1 }); }
+  saveBill(items);
+  updateCartBar();
+  closeMrpPopup();
+  showToast(name + ' (' + size + ') added');
+}
 
-  function updateFabCount() {
-    const items = getCurrentBill();
-    const count = items.reduce((s,i)=>s+i.qty,0);
-    const total = items.reduce((s,i)=>s+(i.price*i.qty),0);
-    const summary = document.getElementById('cartBarSummary');
-    const totalEl = document.getElementById('cartBarTotal');
-    if (summary) summary.textContent = count > 0 ? count + ' item' + (count===1?'':'s') + ' in bill' : 'No items yet — tap any item to add';
-    if (totalEl) totalEl.textContent = '₹' + total.toLocaleString('en-IN');
-  }
+function addWater(price) {
+  const items = getBill();
+  const key = 'Water \u20b9' + price + '||ea';
+  const existing = items.find(function(i) { return i.key === key; });
+  if (existing) { existing.qty++; } else { items.push({ key: key, name: 'Water', price: price, size: '\u20b9' + price, qty: 1 }); }
+  saveBill(items);
+  renderBillPanel();
+  updateCartBar();
+}
 
-  function renderBill() {
-    const items = getCurrentBill();
-    const container = document.getElementById('billItems');
-    if (!container) return;
-    if (!items.length) {
-      container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-light);font-size:13px;">No items yet</div>';
-      document.getElementById('billTotal').textContent = '₹0';
-      updateFabCount();
-      return;
-    }
-    let total = 0;
-    let html = '';
-    items.forEach((item, idx) => {
-      const sub = item.price * item.qty;
-      total += sub;
-      html += `<div style="display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border);gap:8px;" id="billrow-${idx}">
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.name}</div>
-          <div style="font-size:11px;color:var(--text-light);letter-spacing:0.5px;">${item.size} &nbsp;·&nbsp; ₹${item.price} each</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-          <button onclick="changeQty(${idx},-1)" style="width:26px;height:26px;border:1px solid var(--border);background:#fff;border-radius:3px;font-size:16px;cursor:pointer;line-height:1;color:var(--navy);">−</button>
-          <input type="number" value="${item.qty}" min="1" onchange="setQty(${idx},this.value)" style="width:38px;text-align:center;border:1px solid var(--border);border-radius:3px;padding:3px;font-size:14px;font-weight:600;color:var(--navy);">
-          <button onclick="changeQty(${idx},1)" style="width:26px;height:26px;border:1px solid var(--border);background:#fff;border-radius:3px;font-size:16px;cursor:pointer;line-height:1;color:var(--navy);">+</button>
-        </div>
-        <div style="min-width:58px;text-align:right;font-weight:700;font-size:14px;color:var(--navy);">₹${sub.toLocaleString('en-IN')}</div>
-        <button onclick="removeItem(${idx})" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;padding:0 2px;line-height:1;" title="Remove">✕</button>
-      </div>`;
-    });
-    container.innerHTML = html;
-    document.getElementById('billTotal').textContent = '₹' + total.toLocaleString('en-IN');
-    updateFabCount();
-  }
+function addChakna() {
+  const items = getBill();
+  const key = 'Chakna||extra';
+  const existing = items.find(function(i) { return i.key === key; });
+  if (existing) { existing.qty++; } else { items.push({ key: key, name: 'Chakna', price: 20, size: 'extra', qty: 1 }); }
+  saveBill(items);
+  renderBillPanel();
+  updateCartBar();
+}
 
-  function changeQty(idx, delta) {
-    const items = getCurrentBill();
-    if (!items[idx]) return;
-    items[idx].qty = Math.max(1, items[idx].qty + delta);
-    saveBill(items);
-    renderBill();
-  }
-  function setQty(idx, val) {
-    const items = getCurrentBill();
-    if (!items[idx]) return;
-    const n = parseInt(val);
-    if (isNaN(n) || n < 1) return;
-    items[idx].qty = n;
-    saveBill(items);
-    renderBill();
-  }
-  function removeItem(idx) {
-    const items = getCurrentBill();
-    items.splice(idx, 1);
-    saveBill(items);
-    renderBill();
-  }
+function applyDiscount() {
+  const gross = getBill().reduce(function(s,i){ return s+(i.price*i.qty); }, 0);
+  const discEl = document.getElementById('discountInput');
+  const disc = discEl ? (parseInt(discEl.value) || 0) : 0;
+  const net = Math.max(0, gross - disc);
+  const netEl = document.getElementById('netTotal');
+  if (netEl) netEl.textContent = fmt(net);
+}
 
-  function markAsPaid() {
-    const items = getCurrentBill();
-    if (!items.length) { showToast('Bill is empty'); return; }
-    const total = items.reduce((s,i)=>s+(i.price*i.qty),0);
-    const history = getBillHistory();
-    history.unshift({ id: Date.now(), time: new Date().toLocaleString('en-IN'), items: [...items], total });
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-    localStorage.removeItem(BILL_KEY);
-    renderBill();
-    showToast('Bill marked as paid ✓');
-  }
+function updateCartBar() {
+  const items = getBill();
+  const count = items.reduce(function(s,i) { return s+i.qty; }, 0);
+  const gross = items.reduce(function(s,i) { return s+(i.price*i.qty); }, 0);
+  const discEl2 = document.getElementById('discountInput');
+  const disc = discEl2 ? (parseInt(discEl2.value) || 0) : 0;
+  const total = Math.max(0, gross - disc);
+  const summary = document.getElementById('cartBarSummary');
+  const totalEl = document.getElementById('cartBarTotal');
+  if (summary) summary.textContent = count > 0 ? count + ' item' + (count===1?'':'s') + ' in bill' : 'Tap any item to add';
+  if (totalEl) totalEl.textContent = fmt(total);
+  const badge = document.getElementById('cartIconCount');
+  if (badge) { if (count > 0) { badge.style.display='block'; badge.textContent=count; } else { badge.style.display='none'; } }
+}
 
-  function clearAllData() {
-    if (!confirm('Clear all billing data? This cannot be undone.')) return;
-    localStorage.removeItem(BILL_KEY);
-    localStorage.removeItem(HISTORY_KEY);
-    renderBill();
-    showToast('All data cleared');
+function renderBillPanel() {
+  const items = getBill();
+  const container = document.getElementById('billItems');
+  if (!container) return;
+  if (!items.length) {
+    container.innerHTML = '<div style="text-align:center;padding:28px;color:var(--text-light);font-size:14px;">No items — tap any menu item to add</div>';
+    document.getElementById('billTotal').textContent = fmt(0);
+    updateCartBar();
+    return;
   }
+  let total = 0;
+  let html = '';
+  items.forEach(function(item, idx) {
+    const sub = item.price * item.qty;
+    total += sub;
+    html += '<div style="display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);gap:8px;">' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:14px;font-weight:500;color:var(--text);">' + item.name + '</div>' +
+        '<div style="font-size:12px;color:var(--text-light);">' + item.size + ' &nbsp;&middot;&nbsp; ' + fmt(item.price) + ' each</div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">' +
+        '<button onclick="changeQty(' + idx + ',-1)" style="width:28px;height:28px;border:1px solid var(--border);background:#fff;border-radius:3px;font-size:18px;cursor:pointer;line-height:1;color:var(--navy);">\u2212</button>' +
+        '<input type="number" value="' + item.qty + '" min="1" onchange="setQty(' + idx + ',this.value)" style="width:40px;text-align:center;border:1px solid var(--border);border-radius:3px;padding:4px;font-size:14px;font-weight:600;color:var(--navy);">' +
+        '<button onclick="changeQty(' + idx + ',1)" style="width:28px;height:28px;border:1px solid var(--border);background:#fff;border-radius:3px;font-size:18px;cursor:pointer;line-height:1;color:var(--navy);">+</button>' +
+      '</div>' +
+      '<div style="min-width:60px;text-align:right;font-weight:700;font-size:15px;color:var(--navy);">' + fmt(sub) + '</div>' +
+      '<button onclick="removeItem(' + idx + ')" style="background:none;border:none;color:#bbb;font-size:18px;cursor:pointer;padding:0 3px;line-height:1;">\u2715</button>' +
+    '</div>';
+  });
+  container.innerHTML = html;
+  document.getElementById('billTotal').textContent = fmt(total);
+  const discEl = document.getElementById('discountInput');
+  const netEl = document.getElementById('netTotal');
+  if (netEl) netEl.textContent = discEl && discEl.value ? fmt(Math.max(0,total-(parseInt(discEl.value)||0))) : fmt(total);
+  updateCartBar();
+}
 
-  function openBilling() {
-    document.getElementById('billingPanel').style.display = 'block';
-    renderBill();
-  }
-  function closeBilling() { document.getElementById('billingPanel').style.display = 'none'; }
+function changeQty(idx, delta) {
+  const items = getBill();
+  if (!items[idx]) return;
+  items[idx].qty = Math.max(1, items[idx].qty + delta);
+  saveBill(items); renderBillPanel();
+}
+function setQty(idx, val) {
+  const items = getBill();
+  if (!items[idx]) return;
+  const n = parseInt(val);
+  if (!isNaN(n) && n >= 1) { items[idx].qty = n; saveBill(items); renderBillPanel(); }
+}
+function removeItem(idx) {
+  const items = getBill(); items.splice(idx,1); saveBill(items); renderBillPanel();
+}
 
-  function showBillHistory() {
-    const history = getBillHistory();
-    const container = document.getElementById('billHistoryList');
-    if (!history.length) {
-      container.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(201,168,76,0.5);font-size:14px;">No paid bills yet</div>';
-    } else {
-      container.innerHTML = history.map((bill, bi) => {
-        const rows = bill.items.map(i =>
-          `<div style="display:flex;justify-content:space-between;padding:5px 14px;font-size:13px;color:rgba(255,255,255,0.7);">
-            <span>${i.name} (${i.size}) × ${i.qty}</span>
-            <span>₹${(i.price*i.qty).toLocaleString('en-IN')}</span>
-          </div>`).join('');
-        return `<div style="background:rgba(255,255,255,0.05);border:1px solid rgba(201,168,76,0.2);border-radius:4px;margin-bottom:12px;overflow:hidden;">
-          <div style="background:rgba(201,168,76,0.1);padding:8px 14px;display:flex;justify-content:space-between;align-items:center;">
-            <span style="color:var(--gold-light);font-size:12px;font-weight:600;">#${history.length - bi} &nbsp;·&nbsp; ${bill.time}</span>
-            <span style="color:var(--gold-light);font-weight:700;font-size:15px;">₹${bill.total.toLocaleString('en-IN')}</span>
-          </div>
-          ${rows}
-        </div>`;
+function markAsPaid() {
+  const items = getBill();
+  if (!items.length) { showToast('Bill is empty'); return; }
+  const gross = items.reduce(function(s,i) { return s+(i.price*i.qty); }, 0);
+  const disc = parseInt((document.getElementById('discountInput')||{}).value) || 0;
+  const total = Math.max(0, gross - disc);
+  const hist = getHistory();
+  hist.unshift({ id: Date.now(), time: new Date().toLocaleString('en-IN'), items: JSON.parse(JSON.stringify(items)), total: total, discount: disc });
+  localStorage.setItem(HIST_KEY, JSON.stringify(hist));
+  localStorage.removeItem(BILL_KEY);
+  renderBillPanel();
+  showToast('Bill paid \u2713');
+}
+
+function clearAllData() {
+  if (!confirm('Clear all billing data? Cannot be undone.')) return;
+  localStorage.removeItem(BILL_KEY);
+  localStorage.removeItem(HIST_KEY);
+  renderBillPanel();
+  showToast('All data cleared');
+}
+
+function openBilling() {
+  document.getElementById('billingPanel').style.display = 'block';
+  renderBillPanel();
+}
+function closeBilling() { document.getElementById('billingPanel').style.display = 'none'; }
+
+function showBillHistory() {
+  const hist = getHistory();
+  const c = document.getElementById('billHistoryList');
+  if (!hist.length) {
+    c.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(201,168,76,0.4);font-size:14px;">No paid bills yet</div>';
+  } else {
+    c.innerHTML = hist.map(function(bill, bi) {
+      const rows = bill.items.map(function(i) {
+        return '<div style="display:flex;justify-content:space-between;padding:5px 14px;font-size:13px;color:rgba(255,255,255,0.65);">' +
+          '<span>' + i.name + ' (' + i.size + ') \xd7 ' + i.qty + '</span>' +
+          '<span>' + fmt(i.price * i.qty) + '</span></div>';
       }).join('');
+      return '<div style="background:rgba(255,255,255,0.05);border:1px solid rgba(201,168,76,0.2);border-radius:4px;margin-bottom:12px;overflow:hidden;">' +
+        '<div style="background:rgba(201,168,76,0.1);padding:9px 14px;display:flex;justify-content:space-between;align-items:center;">' +
+          '<span style="color:var(--gold-light);font-size:12px;font-weight:600;">#' + (hist.length-bi) + ' &nbsp;&middot;&nbsp; ' + bill.time + '</span>' +
+          '<span style="color:var(--gold-light);font-weight:700;font-size:16px;">' + fmt(bill.total) + (bill.discount ? ' <span style="font-size:11px;opacity:0.6;">(disc: ' + fmt(bill.discount) + ')</span>' : '') + '</span>' +
+        '</div>' + rows + '</div>';
+    }).join('');
+  }
+  document.getElementById('billHistoryPanel').style.display = 'block';
+}
+function closeBillHistory() { document.getElementById('billHistoryPanel').style.display = 'none'; }
+
+function showToast(msg) {
+  let t = document.getElementById('toastMsg');
+  if (!t) { t = document.createElement('div'); t.id = 'toastMsg'; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--navy);color:var(--gold-light);padding:10px 20px;border-radius:3px;font-size:13px;z-index:9999;border:1px solid var(--gold);letter-spacing:0.5px;white-space:nowrap;pointer-events:none;';
+  t.style.opacity = '1';
+  clearTimeout(t._t);
+  t._t = setTimeout(function() { t.style.opacity = '0'; }, 2000);
+}
+
+// ── SEARCH ──
+const searchInput = document.getElementById('searchInput');
+const clearBtn = document.getElementById('clearBtn');
+const searchResults = document.getElementById('searchResults');
+const allItems = [];
+const tabMap = {'tab-food':'Food','tab-whisky':'Whisky','tab-beer-wine':'Beer & Wine','tab-vodka-rum':'Vodka & Rum'};
+const liquorTabIds = new Set(['tab-whisky','tab-beer-wine','tab-vodka-rum']);
+
+document.querySelectorAll('.accordion').forEach(function(acc) {
+  const accTitle = (acc.querySelector('.accordion-title') || {}).textContent || '';
+  const panel = acc.closest('.tab-panel');
+  const tabLabel = panel ? (tabMap[panel.id] || '') : '';
+  const isLiquor = panel ? liquorTabIds.has(panel.id) : false;
+  const isFood = panel ? panel.id === 'tab-food' : false;
+  const headerRow = acc.querySelector('.price-header');
+  const headers = headerRow ? Array.from(headerRow.querySelectorAll('td')).map(function(td){ return td.textContent.trim(); }) : [];
+  acc.querySelectorAll('.menu-table tr:not(.price-header)').forEach(function(tr) {
+    const nameEl = tr.querySelector('.item-name');
+    if (!nameEl) return;
+    const bnEl = tr.querySelector('.item-bn');
+    const tds = Array.from(tr.querySelectorAll('td'));
+    const cells = tds.map(function(td,i){ return i===0 ? nameEl.textContent.trim() : td.textContent.trim(); });
+    const sizeTd = tr.querySelector('td.item-size');
+    const rowSize = sizeTd ? sizeTd.textContent.trim() : null;
+    if (isLiquor || isFood) {
+      tr.style.cursor = 'pointer';
+      tr.addEventListener('click', (function(n, f, s){ return function(){ showItemPopup(n, f, s); }; })(nameEl.textContent.trim(), isFood, rowSize));
     }
-    document.getElementById('billHistoryPanel').style.display = 'block';
-  }
-  function closeBillHistory() { document.getElementById('billHistoryPanel').style.display = 'none'; }
-
-  function showToast(msg) {
-    let t = document.getElementById('toastMsg');
-    if (!t) { t = document.createElement('div'); t.id='toastMsg'; document.body.appendChild(t); }
-    t.textContent = msg;
-    t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--navy);color:var(--gold-light);padding:10px 20px;border-radius:3px;font-size:13px;z-index:9999;border:1px solid var(--gold);letter-spacing:0.5px;white-space:nowrap;opacity:1;transition:opacity 0.4s;';
-    clearTimeout(t._timer);
-    t._timer = setTimeout(() => { t.style.opacity='0'; }, 1800);
-  }
-
-  // ── SEARCH ──
-  const searchInput = document.getElementById('searchInput');
-  const clearBtn = document.getElementById('clearBtn');
-  const searchResults = document.getElementById('searchResults');
-  const allItems = [];
-  const tabMap = {'tab-food':'Food','tab-whisky':'Whisky','tab-beer-wine':'Beer & Wine','tab-vodka-rum':'Vodka & Rum'};
-  const liquorTabs = new Set(['tab-whisky','tab-beer-wine','tab-vodka-rum']);
-  const foodTab = 'tab-food';
-
-  document.querySelectorAll('.accordion').forEach(acc => {
-    const accTitle = (acc.querySelector('.accordion-title')||{}).textContent||'';
-    const panel = acc.closest('.tab-panel');
-    const tabLabel = panel ? (tabMap[panel.id]||'') : '';
-    const isLiquor = panel ? liquorTabs.has(panel.id) : false;
-    const headerRow = acc.querySelector('.price-header');
-    const headers = headerRow ? Array.from(headerRow.querySelectorAll('td')).map(td=>td.textContent.trim()) : [];
-    acc.querySelectorAll('.menu-table tr:not(.price-header)').forEach(tr => {
-      const nameEl = tr.querySelector('.item-name');
-      if (!nameEl) return;
-      const bnEl = tr.querySelector('.item-bn');
-      const tds = Array.from(tr.querySelectorAll('td'));
-      const cells = tds.map((td,i) => i===0 ? nameEl.textContent.trim() : td.textContent.trim());
-      const isFood = panel ? panel.id === foodTab : false;
-      if (isLiquor || isFood) { tr.style.cursor='pointer'; tr.addEventListener('click', ()=>showItemPopup(nameEl.textContent.trim(), isFood)); }
-      allItems.push({ name: nameEl.textContent.trim(), bn: bnEl?bnEl.textContent.trim():'', cells, headers, section: accTitle.trim(), tabLabel, isLiquor, isFood: panel?panel.id===foodTab:false });
-    });
+    allItems.push({ name: nameEl.textContent.trim(), bn: bnEl ? bnEl.textContent.trim() : '', cells: cells, headers: headers, section: accTitle.trim(), tabLabel: tabLabel, isLiquor: isLiquor, isFood: isFood, rowSize: rowSize });
   });
+});
 
-  searchInput.addEventListener('input', function() {
-    const q = this.value.trim();
-    clearBtn.style.display = q ? 'block' : 'none';
-    if (!q) { searchResults.innerHTML=''; searchResults.classList.remove('visible'); document.querySelectorAll('.tab-panel').forEach(p=>p.style.display=''); return; }
-    doSearch(q);
+searchInput.addEventListener('input', function() {
+  const q = this.value.trim();
+  clearBtn.style.display = q ? 'block' : 'none';
+  if (!q) { searchResults.innerHTML=''; searchResults.classList.remove('visible'); document.querySelectorAll('.tab-panel').forEach(function(p){p.style.display='';}); return; }
+  doSearch(q);
+});
+
+function doSearch(q) {
+  const ql = q.toLowerCase();
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.style.display='none';});
+  searchResults.classList.add('visible');
+  const matched = allItems.filter(function(i){ return i.name.toLowerCase().includes(ql) || i.bn.includes(q); });
+  if (!matched.length) { searchResults.innerHTML = '<div class="no-results">No items found for "' + q + '"</div>'; return; }
+  const groups = {};
+  matched.forEach(function(item) {
+    const key = item.tabLabel + '|' + item.section;
+    if (!groups[key]) groups[key] = { tabLabel: item.tabLabel, section: item.section, headers: item.headers, items: [] };
+    groups[key].items.push(item);
   });
-
-  function doSearch(q) {
-    const ql = q.toLowerCase();
-    document.querySelectorAll('.tab-panel').forEach(p=>p.style.display='none');
-    searchResults.classList.add('visible');
-    const matched = allItems.filter(i=>i.name.toLowerCase().includes(ql)||i.bn.includes(q));
-    if (!matched.length) { searchResults.innerHTML='<div class="no-results">No items found for "'+q+'"</div>'; return; }
-    const groups = {};
-    matched.forEach(item => {
-      const key = item.tabLabel+'|'+item.section;
-      if (!groups[key]) groups[key]={tabLabel:item.tabLabel,section:item.section,headers:item.headers,items:[]};
-      groups[key].items.push(item);
-    });
-    const esc = q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-    let html='';
-    Object.values(groups).forEach(g => {
-      html += '<div class="search-section-label">'+g.tabLabel+(g.section?' — '+g.section:'')+'</div><table class="menu-table">';
-      if (g.headers.length) {
-        html += '<tr class="price-header">';
-        g.headers.forEach((h,idx) => { const cls=idx===0?'':(idx===g.headers.length-1?' class="item-price"':' class="item-size"'); html+='<td'+cls+'>'+h+'</td>'; });
-        html += '</tr>';
-      }
-      g.items.forEach((item,i) => {
-        const bg = i%2===0?'background:var(--gold-pale2)':'';
-        const cursor = item.isLiquor?'cursor:pointer;':'';
-        const onclick = (item.isLiquor||item.isFood)?' onclick="showItemPopup(\''+item.name.replace(/'/g,"\\'")+'\','+(item.isFood?'true':'false')+')"':'';
-        const hn = item.name.replace(new RegExp(esc,'gi'),m=>'<span class="highlight">'+m+'</span>');
-        html += '<tr style="'+bg+cursor+'"'+onclick+'>';
-        item.cells.forEach((cell,ci) => {
-          if (ci===0) html+='<td><span class="item-name">'+hn+'</span>'+(item.bn?'<span class="item-bn">'+item.bn+'</span>':'')+'</td>';
-          else if (ci===item.cells.length-1) html+='<td class="item-price">'+cell+'</td>';
-          else html+='<td class="item-size">'+cell+'</td>';
-        });
-        html += '</tr>';
+  const esc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  let html = '';
+  Object.values(groups).forEach(function(g) {
+    html += '<div class="search-section-label">' + g.tabLabel + (g.section ? ' \u2014 ' + g.section : '') + '</div><table class="menu-table">';
+    if (g.headers.length) {
+      html += '<tr class="price-header">';
+      g.headers.forEach(function(h, idx) { const cls = idx===0?'':(idx===g.headers.length-1?' class="item-price"':' class="item-size"'); html += '<td'+cls+'>'+h+'</td>'; });
+      html += '</tr>';
+    }
+    g.items.forEach(function(item, i) {
+      const bg = i%2===0 ? 'background:var(--gold-pale2)' : '';
+      const clickable = item.isLiquor || item.isFood;
+      const cursor = clickable ? 'cursor:pointer;' : '';
+      const isF = item.isFood;
+      // size is cells[1] for liquor items that have it (non-price value)
+      const rowSz = (item.isLiquor && item.cells.length >= 3 && !item.cells[1].startsWith('\u20b9') && !item.cells[1].startsWith('\u20b9')) ? item.cells[1] : null;
+      const hn = item.name.replace(new RegExp(esc,'gi'), function(m){ return '<span class="highlight">'+m+'</span>'; });
+      html += '<tr style="' + bg + cursor + '" ' + (clickable ? 'onclick="showItemPopup(\'' + item.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',' + isF + ',\'' + (item.rowSize||'') + '\')"' : '') + '>';
+      item.cells.forEach(function(cell, ci) {
+        if (ci===0) html += '<td><span class="item-name">'+hn+'</span>'+(item.bn?'<span class="item-bn">'+item.bn+'</span>':'')+'</td>';
+        else if (ci===item.cells.length-1) html += '<td class="item-price">'+cell+'</td>';
+        else html += '<td class="item-size">'+cell+'</td>';
       });
-      html += '</table>';
+      html += '</tr>';
     });
-    searchResults.innerHTML = html;
-  }
+    html += '</table>';
+  });
+  searchResults.innerHTML = html;
+}
 
-  function clearSearch() {
-    searchInput.value=''; clearBtn.style.display='none'; searchResults.innerHTML='';
-    searchResults.classList.remove('visible'); document.querySelectorAll('.tab-panel').forEach(p=>p.style.display='');
-  }
+function clearSearch() {
+  searchInput.value = ''; clearBtn.style.display = 'none';
+  searchResults.innerHTML = ''; searchResults.classList.remove('visible');
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.style.display='';});
+}
 
-  if (parseInt(localStorage.getItem('royal_emp_attempts')||'0') >= 5) {
-    const btn = document.getElementById('empLoginBtn');
-    if (btn) btn.style.display='none';
-  }
-  initAuth();
-  updateFabCount();
+initAuth();
+updateCartBar();
 </script>
-
 
 <!-- Login Popup -->
 <div class="overlay" id="loginOverlay" onclick="if(event.target===this)closeLoginPopup()">
@@ -1044,7 +1131,7 @@
   </div>
 </div>
 
-<!-- MRP / Item Popup -->
+<!-- Item Info Popup -->
 <div class="overlay" id="mrpOverlay" onclick="if(event.target===this)closeMrpPopup()">
   <div class="popup" style="max-width:380px">
     <button class="popup-close" onclick="closeMrpPopup()">&#x2715;</button>
@@ -1052,21 +1139,21 @@
     <div class="mrp-item-name" id="mrpItemName"></div>
     <div class="mrp-row" id="mrpMrpRow" style="display:none">
       <span class="mrp-label">MRP</span>
-      <span class="mrp-value" id="mrpMrpVal" style="color:#888;font-size:15px;text-decoration:line-through;"></span>
+      <span class="mrp-value" id="mrpMrpVal" style="color:#999;font-size:15px;text-decoration:line-through;"></span>
     </div>
     <div class="mrp-row">
-      <span class="mrp-label" id="mrpFullLabel">Dine-In (Full)</span>
+      <span class="mrp-label" id="mrpFullLabel">Dine-In (Full Bottle)</span>
       <span class="mrp-value" id="mrpFull"></span>
     </div>
     <div class="mrp-row" id="mrp60mlRow" style="display:none">
-      <span class="mrp-label">60ml (Dine-In)</span>
+      <span class="mrp-label">60ml</span>
       <span class="mrp-value" id="mrp60ml"></span>
     </div>
-    <div class="mrp-row" id="mrpHalfRow">
-      <span class="mrp-label">Half Bottle</span>
+    <div class="mrp-row" id="mrpHalfRow" style="display:none">
+      <span class="mrp-label" id="mrpHalfLabel">Half</span>
       <span class="mrp-value" id="mrpHalf"></span>
     </div>
-    <div class="mrp-row" id="mrpQtrRow">
+    <div class="mrp-row" id="mrpQtrRow" style="display:none">
       <span class="mrp-label">Quarter Bottle</span>
       <span class="mrp-value" id="mrpQtr"></span>
     </div>
@@ -1075,60 +1162,59 @@
 </div>
 
 <!-- Billing Panel -->
-<div id="billingPanel" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(10,16,40,0.95);overflow-y:auto;padding:16px 12px 80px;">
+<div id="billingPanel" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(10,16,40,0.96);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 12px 100px;">
   <div style="max-width:520px;margin:0 auto;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <span style="color:var(--gold-light);font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">&#x1F9FE; Current Bill</span>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+      <span style="color:var(--gold-light);font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">&#x1F9FE; Bill</span>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <button onclick="showBillHistory()" style="background:none;border:1px solid rgba(201,168,76,0.4);color:rgba(201,168,76,0.8);font-size:11px;padding:6px 12px;cursor:pointer;border-radius:2px;letter-spacing:1px;">&#x1F4CB; History</button>
-        <button onclick="clearAllData()" style="background:none;border:1px solid rgba(220,80,80,0.4);color:rgba(220,80,80,0.8);font-size:11px;padding:6px 12px;cursor:pointer;border-radius:2px;letter-spacing:1px;">&#x1F5D1; Clear Data</button>
-        <button onclick="closeBilling()" style="background:none;border:none;color:rgba(201,168,76,0.6);font-size:24px;cursor:pointer;line-height:1;padding:0 4px;">&#x2715;</button>
+        <button onclick="showBillHistory()" style="background:none;border:1px solid rgba(201,168,76,0.35);color:rgba(201,168,76,0.8);font-size:12px;padding:7px 14px;cursor:pointer;border-radius:2px;letter-spacing:1px;">&#x1F4CB; History</button>
+        <button onclick="clearAllData()" style="background:none;border:1px solid rgba(220,80,80,0.35);color:rgba(220,80,80,0.8);font-size:12px;padding:7px 14px;cursor:pointer;border-radius:2px;letter-spacing:1px;">&#x1F5D1; Clear</button>
+        <button onclick="closeBilling()" style="background:none;border:none;color:rgba(201,168,76,0.6);font-size:26px;cursor:pointer;line-height:1;padding:0 4px;">&#x2715;</button>
       </div>
     </div>
-
     <div style="background:var(--cream);border-radius:4px;border:1px solid var(--border);overflow:hidden;">
-      <!-- Water buttons -->
       <div style="background:var(--navy-dark);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <span style="color:rgba(201,168,76,0.6);font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-right:4px;">Add:</span>
-        <button onclick="addWater(10)" style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);color:var(--gold);font-size:12px;padding:5px 12px;cursor:pointer;border-radius:2px;">&#x1F4A7; Water &#8377;10</button>
-        <button onclick="addWater(20)" style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);color:var(--gold);font-size:12px;padding:5px 12px;cursor:pointer;border-radius:2px;">&#x1F4A7; Water &#8377;20</button>
+        <span style="color:rgba(201,168,76,0.55);font-size:11px;letter-spacing:1px;text-transform:uppercase;">Quick add:</span>
+        <button onclick="addWater(10)" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);color:var(--gold);font-size:12px;padding:5px 12px;cursor:pointer;border-radius:2px;">&#x1F4A7; Water &#8377;10</button>
+        <button onclick="addWater(20)" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);color:var(--gold);font-size:12px;padding:5px 12px;cursor:pointer;border-radius:2px;">&#x1F4A7; Water &#8377;20</button>
+        <button onclick="addChakna()" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);color:var(--gold);font-size:12px;padding:5px 12px;cursor:pointer;border-radius:2px;">&#x1F372; Chakna +&#8377;20</button>
       </div>
-      <!-- Items -->
       <div id="billItems" style="min-height:80px;"></div>
-      <!-- Total + Pay -->
       <div style="border-top:2px solid var(--gold);padding:14px 16px;background:var(--gold-pale2);">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-          <span style="font-size:14px;font-weight:600;color:var(--text);letter-spacing:0.5px;">TOTAL</span>
-          <span id="billTotal" style="font-size:22px;font-weight:700;color:var(--navy);">&#8377;0</span>
+          <span style="font-size:14px;font-weight:700;color:var(--text);letter-spacing:1px;">TOTAL</span>
+          <span id="billTotal" style="font-size:24px;font-weight:700;color:var(--navy);">&#8377;0</span>
         </div>
-        <button onclick="markAsPaid()" style="width:100%;padding:13px;background:var(--navy);color:var(--gold-light);border:none;border-radius:3px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">&#x2714; Mark as Paid</button>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span style="font-size:13px;color:var(--text-light);white-space:nowrap;">Discount &#8377;</span>
+          <input type="number" id="discountInput" min="0" placeholder="0" oninput="applyDiscount()" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:3px;font-size:15px;font-weight:600;color:var(--navy);text-align:center;">
+          <span style="font-size:13px;color:var(--text);font-weight:600;white-space:nowrap;">Net: <span id="netTotal" style="color:var(--navy);font-weight:700;">&#8377;0</span></span>
+        </div>
+        <button onclick="markAsPaid()" style="width:100%;padding:13px;background:var(--navy);color:var(--gold-light);border:none;border-radius:3px;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">&#x2714; Mark as Paid</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- Bill History Panel -->
-<div id="billHistoryPanel" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(10,16,40,0.96);overflow-y:auto;padding:16px 12px 40px;">
+<div id="billHistoryPanel" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(10,16,40,0.97);overflow-y:auto;padding:16px 12px 40px;">
   <div style="max-width:520px;margin:0 auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
       <span style="color:var(--gold-light);font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">&#x1F4CB; Bill History</span>
-      <button onclick="closeBillHistory()" style="background:none;border:none;color:rgba(201,168,76,0.6);font-size:24px;cursor:pointer;line-height:1;">&#x2715;</button>
+      <button onclick="closeBillHistory()" style="background:none;border:none;color:rgba(201,168,76,0.6);font-size:26px;cursor:pointer;line-height:1;">&#x2715;</button>
     </div>
     <div id="billHistoryList"></div>
   </div>
 </div>
 
 <!-- Sticky Cart Bar (staff only) -->
-<div id="cartBar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:400;background:var(--navy);border-top:2px solid var(--gold);padding:10px 16px;">
-  <div style="max-width:800px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-    <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
-      <span style="font-size:20px;">&#x1F9FE;</span>
-      <div style="min-width:0;">
-        <div id="cartBarSummary" style="color:rgba(201,168,76,0.7);font-size:12px;letter-spacing:0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
-        <div id="cartBarTotal" style="color:var(--gold-light);font-size:18px;font-weight:700;">&#8377;0</div>
-      </div>
+<div id="cartBar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:400;background:var(--navy);border-top:2px solid var(--gold);padding:11px 16px;">
+  <div style="max-width:800px;margin:0 auto;display:flex;align-items:center;gap:12px;">
+    <div style="flex:1;min-width:0;">
+      <div id="cartBarSummary" style="color:rgba(201,168,76,0.6);font-size:12px;letter-spacing:0.5px;"></div>
+      <div id="cartBarTotal" style="color:var(--gold-light);font-size:20px;font-weight:700;line-height:1.2;">&#8377;0</div>
     </div>
-    <button onclick="openBilling()" style="background:var(--gold);color:var(--navy-dark);border:none;padding:10px 20px;border-radius:3px;font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;white-space:nowrap;flex-shrink:0;">View Bill</button>
+    <button onclick="openBilling()" style="background:var(--gold);color:var(--navy-dark);border:none;padding:12px 22px;border-radius:3px;font-size:14px;font-weight:700;letter-spacing:1px;cursor:pointer;white-space:nowrap;flex-shrink:0;">View Bill &#x2192;</button>
   </div>
 </div>
 
