@@ -76,7 +76,7 @@ var ml60Map = {
 var foodData = {
   "chilly chicken dry":199,"chilli chicken dry":199,"chicken dry fry":199,"chicken dry":199,
   "chicken pakora":189,"chilli chicken":220,"chicken 65":200,"crispy chicken":219,
-  "chicken manchurian dry":249,"chicken lollipop":229,"fish fry (1 pc)":60,"fish fry (2 pcs)":199,
+  "chicken manchurian dry":249,"chicken lollipop":229,"fish fry (1 pc)":60,"fish fry (2 pcs)":150,
   "crispy chilli baby corn":179,"paneer 65":179,"chilli paneer dry":179,"paneer bhurji":199,
   "paneer pakora":150,"veg pakora":80,"egg bhurji":49,"egg pakora":60,
   "masala omelette":39,"masala omlette":39,"plain omlette":39,"boiled egg (2 pcs)":39,
@@ -85,7 +85,7 @@ var foodData = {
   "chicken butter masala":250,"kadai chicken":220,"mutton kosha":380,"mutton curry":300,
   "chana masala":50,"peanut masala":60,"green salad":59,"onion salad":39,
   "cucumber salad":39,"lemon & chilli salad":29,"lemon &amp; chilli salad":29,"rocket salad":99,
-  "roti":10,"butter roti":15,"plain rice (basmati)":60
+  "roti":10,"butter roti":20,"plain rice (basmati)":60
 };
 var beerKeys = ['kingfisher','tuborg','carlsberg','budweiser','corona','breezer'];
 
@@ -217,15 +217,18 @@ function showItemPopup(name,isFood,size,tabId){
   if(isFood){showFoodPopup(name);}else{showLiquorPopup(name,size,tabId);}
 }
 
+var foodNoHalf=new Set(['roti','butter roti']);
 function showFoodPopup(name){
   var key=name.toLowerCase().trim();
   var price=lookup(foodData,key);
-  var half=price?Math.ceil((price/2)/5)*5:null;
-  if(price)_popupSizes['Full']={price:price,label:'Full plate'};
+  var noHalf=foodNoHalf.has(key);
+  var half=!noHalf&&price?Math.ceil((price/2)/5)*5:null;
+  var label=noHalf?'pc':'Full plate';
+  if(price)_popupSizes['Full']={price:price,label:label};
   if(half)_popupSizes['Half']={price:half,label:'Half plate'};
   document.getElementById('mrpItemName').textContent=name;
   document.getElementById('mrpMrpRow').classList.add('mrp-row-hidden');
-  document.getElementById('mrpFullLabel').textContent='Full Plate';
+  document.getElementById('mrpFullLabel').textContent=noHalf?'Per piece':'Full Plate';
   document.getElementById('mrpFull').textContent=price?fmt(price):'\u2014';
   document.getElementById('mrpHalfLabel').textContent='Half Plate';
   document.getElementById('mrpHalf').textContent=half?fmt(half):'';
