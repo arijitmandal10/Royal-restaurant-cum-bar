@@ -87,7 +87,7 @@ header img { width: 70px; height: auto; filter: drop-shadow(0 2px 8px rgba(201,1
 .menu-table tr:nth-child(even) { background: var(--gold-pale2); }
 .menu-table tr:hover { background: var(--gold-pale); }
 .menu-table td { padding: 8px 12px; vertical-align: middle; }
-.item-name { color: var(--text); font-weight: 500; font-size: 14px; line-height: 1.2; }
+.item-name { color: var(--text); font-weight: 500; font-size: 17px; line-height: 1.2; letter-spacing: 1.1px; }
 .item-bn { color: var(--text-light); font-size: 12px; font-family: 'Hind Siliguri', sans-serif; display: block; margin-top: 1px; font-weight: 400; }
 .item-price { text-align: right; color: var(--navy); font-weight: 700; font-size: 14px; white-space: nowrap; min-width: 55px; }
 .item-size { text-align: center; color: var(--text-light); font-size: 13px; white-space: nowrap; padding: 8px 8px; }
@@ -110,7 +110,7 @@ footer { text-align: center; background: var(--navy-dark); color: rgba(201,168,7
 @media (max-width: 480px) {
   .tab-btn { font-size: 12px; padding: 11px 14px 10px; letter-spacing: 0.8px; }
   .menu-table td { padding: 7px 8px; }
-  .item-name { font-size: 13px; }
+  .item-name { font-size: 16px; }
   #empLoginBtn { font-size: 11px; padding: 6px 10px; }
   .search-inner { max-width: none; }
 }
