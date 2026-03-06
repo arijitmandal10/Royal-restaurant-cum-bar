@@ -103,7 +103,6 @@ header img { width: 70px; height: auto; filter: drop-shadow(0 2px 8px rgba(201,1
 .highlight { background: rgba(201,168,76,0.3); border-radius: 2px; }
 .no-results { text-align: center; padding: 40px 20px; color: var(--text-light); font-size: 16px; }
 .search-row-even { background:var(--gold-pale2); }
-.search-section-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); background: var(--navy); padding: 4px 12px; display: inline-block; margin: 14px 0 4px; border-radius: 2px; }
 
 footer { text-align: center; background: var(--navy-dark); color: rgba(201,168,76,0.5); padding: 14px; font-size: 12px; border-top: 2px solid var(--gold); letter-spacing: 1px; }
 
@@ -233,6 +232,12 @@ input[type=password] { width:100%;padding:10px 14px;border:1.5px solid var(--bor
 .btn-create-bill { flex:2;padding:11px;background:var(--navy);color:var(--gold-light);border:none;border-radius:3px;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer; }
 #billPane-pending { padding:12px 14px; }
 #billPane-history { padding:12px 14px; }
+.bill-menu-section { background:var(--navy); border-bottom:2px solid var(--gold); }
+.bill-menu-section.hidden { display:none !important; }
+.bill-menu-section #searchResults { max-height:50vh; overflow-y:auto; padding:12px; margin:0 12px 12px; background:#fff; border:1px solid var(--border); border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.15); }
+.bill-menu-section .menu-table tr:nth-child(even),
+.bill-menu-section .search-row-even { background:#f8f6f0; }
+.bill-menu-section .menu-table tr:hover { background:#ede8dc; }
 .pending-detail-inner { max-width:680px;width:97%;margin:0 auto; }
 .pending-detail-header { display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid rgba(201,168,76,0.2);position:sticky;top:0;background:rgba(10,16,40,0.98);z-index:10; }
 #pendingDetailTitle { color:var(--gold-light);font-size:14px;font-weight:700;letter-spacing:1px; }
