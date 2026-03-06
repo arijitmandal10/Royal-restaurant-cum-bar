@@ -78,7 +78,7 @@ var foodData = {
   "chicken pakora":189,"chilli chicken":220,"chicken 65":200,"crispy chicken":219,
   "chicken manchurian dry":249,"chicken lollipop":229,"fish fry (1 pc)":60,"fish fry (2 pcs)":199,
   "crispy chilli baby corn":179,"paneer 65":179,"chilli paneer dry":179,"paneer bhurji":199,
-  "paneer pakora":99,"veg pakora":80,"egg bhurji":49,"egg pakora":60,
+  "paneer pakora":150,"veg pakora":80,"egg bhurji":49,"egg pakora":60,
   "masala omelette":39,"masala omlette":39,"plain omlette":39,"boiled egg (2 pcs)":39,
   "onion pakora":60,"papar fry":29,"papad fry":29,"papad roast":19,"masala papad":39,"papar dry":20,
   "butter paneer":200,"kadai paneer":180,"chilly paneer":160,"chicken kosha":200,
@@ -318,7 +318,7 @@ function addWater(price){
 function addChakna(){
   var items=getBill();var key='Chakna||extra';
   var ex=items.find(function(i){return i.key===key;});
-  if(ex){ex.qty++;}else{items.push({key:key,name:'Chakna',price:20,size:'extra',qty:1});}
+  if(ex){ex.qty++;}else{items.push({key:key,name:'Chakna',price:10,size:'extra',qty:1});}
   saveBill(items);renderBillPanel();updateCartBar();
 }
 function addCustomItem(){
@@ -416,6 +416,7 @@ function markPaid(id){
 function editPendingBill(id){
   var pending=getPending();var bill=pending.find(function(b){return b.id===id;});if(!bill)return;
   saveBill(bill.items);savePending(pending.filter(function(b){return b.id!==id;}));
+  var billOnEl=document.getElementById('billOnInput');if(billOnEl)billOnEl.value=bill.billOn||'';
   closePendingDetail();renderBillPanel();switchBillTab('current');showToast('Bill loaded for editing');
 }
 function deletePendingBill(id){
