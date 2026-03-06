@@ -200,6 +200,7 @@ function refreshPopupQty(){
     if(qty>0){addBtn.classList.add('inline-add-hidden');sel.classList.remove('qty-sel-hidden');if(countEl)countEl.textContent=qty;}
     else{addBtn.classList.remove('inline-add-hidden');sel.classList.add('qty-sel-hidden');}
   });
+  renderBillPanel();
   updateCartBar();
 }
 
@@ -307,7 +308,7 @@ function addToCart(name,price,size){
   var items=getBill();var key=name+'||'+size;
   var ex=items.find(function(i){return i.key===key;});
   if(ex){ex.qty++;}else{items.push({key:key,name:name,price:price,size:size,qty:1});}
-  saveBill(items);updateCartBar();showToast(name+' ('+size+') added');
+  saveBill(items);renderBillPanel();updateCartBar();showToast(name+' ('+size+') added');
 }
 function addWater(price){
   var items=getBill();var key='Water \u20b9'+price+'||ea';
@@ -417,7 +418,9 @@ function editPendingBill(id){
   var pending=getPending();var bill=pending.find(function(b){return b.id===id;});if(!bill)return;
   saveBill(bill.items);savePending(pending.filter(function(b){return b.id!==id;}));
   var billOnEl=document.getElementById('billOnInput');if(billOnEl)billOnEl.value=bill.billOn||'';
-  closePendingDetail();renderBillPanel();switchBillTab('current');showToast('Bill loaded for editing');
+  var discEl=document.getElementById('discountInput');var discRow=document.getElementById('discountRow');var discBtn=document.getElementById('discountToggleBtn');
+  if(bill.discount&&bill.discount>0){if(discEl)discEl.value=bill.discount;if(discRow)discRow.classList.remove('hidden');if(discBtn)discBtn.textContent='\u2715 Discount';}
+  closePendingDetail();renderBillPanel();switchBillTab('current');showSearchInBilling();showToast('Bill loaded for editing');
 }
 function deletePendingBill(id){
   if(!confirm('Delete this pending bill?'))return;
@@ -486,7 +489,27 @@ function renderHistoryBills(){
   }).join('');
 }
 
+var billingEditMode=false;
+function showSearchInBilling(){
+  var sect=document.getElementById('billMenuSection');var sw=document.querySelector('.search-wrap');var sr=document.getElementById('searchResults');
+  if(!sect||!sw||!sr)return;
+  var ct=document.querySelector('.content');
+  if(ct&&sr.parentNode===ct)ct.removeChild(sr);
+  sect.appendChild(sw);sect.appendChild(sr);
+  sect.classList.remove('hidden');
+  billingEditMode=true;
+}
+function hideSearchInBilling(){
+  var sect=document.getElementById('billMenuSection');var sw=document.querySelector('.search-wrap');var sr=document.getElementById('searchResults');
+  if(!sect||!sw||!sr)return;
+  sect.classList.add('hidden');
+  var header=document.querySelector('header');var tw=document.querySelector('.tabs-wrap');var ct=document.querySelector('.content');
+  if(header){header.parentNode.insertBefore(sw,header.nextSibling);}
+  if(ct){ct.insertBefore(sr,ct.firstChild);}
+  billingEditMode=false;
+}
 function switchBillTab(tab){
+  if(billingEditMode&&tab!=='current')hideSearchInBilling();
   ['current','pending','history'].forEach(function(t){
     var pane=document.getElementById('billPane-'+t);if(pane)pane.classList.toggle('hidden',t!==tab);
     var btn=document.getElementById('billTab-'+t);
@@ -501,7 +524,7 @@ function clearAllData(){
   renderBillPanel();updateCartBar();showToast('All data cleared');
 }
 function openBilling(){var p=document.getElementById('billingPanel');if(!p)return;p.classList.remove('hidden');switchBillTab('current');renderBillPanel();}
-function closeBilling(){var p=document.getElementById('billingPanel');if(p)p.classList.add('hidden');}
+function closeBilling(){var p=document.getElementById('billingPanel');if(p){hideSearchInBilling();p.classList.add('hidden');}}
 
 function showToast(msg){
   var t=document.getElementById('toastMsg');
@@ -556,7 +579,7 @@ function doSearch(q){
   matched.forEach(function(item){var k=item.tabLabel+'|'+item.section;if(!groups[k])groups[k]={tabLabel:item.tabLabel,section:item.section,headers:item.headers,items:[]};groups[k].items.push(item);});
   var esc=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');var html='';
   Object.values(groups).forEach(function(g){
-    html+='<div class="search-section-label">'+g.tabLabel+(g.section?' \u2014 '+g.section:'')+'</div><table class="menu-table">';
+    html+='<table class="menu-table">';
     if(g.headers.length){html+='<tr class="price-header">';g.headers.forEach(function(h,idx){var cls=idx===0?'':(idx===g.headers.length-1?' class="item-price"':' class="item-size"');html+='<td'+cls+'>'+h+'</td>';});html+='</tr>';}
     g.items.forEach(function(item,i){
       var rowClass=[i%2===0?'search-row-even':'',item.isLiquor||item.isFood?'row-clickable':''].filter(Boolean).join(' ');
