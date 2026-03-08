@@ -357,7 +357,15 @@
     <div class="mrp-item-name" id="mrpItemName"></div>
     <div class="mrp-row mrp-row-hidden" id="mrpMrpRow">
       <span class="mrp-label">MRP</span>
-      <span class="mrp-value mrp-value-strike" id="mrpMrpVal"></span>
+      <div class="mrp-qty-row">
+        <span class="mrp-value" id="mrpMrpVal"></span>
+        <div id="mrpMrpSel" class="qty-sel qty-sel-hidden">
+          <button class="qty-btn" onclick="popupQtyChange('MRP',-1)">&#x2212;</button>
+          <span class="qty-num" id="mrpMrpCount">0</span>
+          <button class="qty-btn" onclick="popupQtyChange('MRP',1)">+</button>
+        </div>
+        <button id="mrpMrpAdd" class="inline-add-btn inline-add-hidden" onclick="popupQtyChange('MRP',1)">+</button>
+      </div>
     </div>
     <div class="mrp-row" id="mrpFullRow2">
       <span class="mrp-label" id="mrpFullLabel">Dine-In</span>
@@ -383,6 +391,18 @@
         <button id="mrp60mlAdd" class="inline-add-btn inline-add-hidden" onclick="popupQtyChange('60ml',1)">+</button>
       </div>
     </div>
+    <div class="mrp-row mrp-row-hidden" id="mrp30mlRow">
+      <span class="mrp-label">30ml</span>
+      <div class="mrp-qty-row">
+        <span class="mrp-value" id="mrp30ml"></span>
+        <div id="mrp30mlSel" class="qty-sel qty-sel-hidden">
+          <button class="qty-btn" onclick="popupQtyChange('30ml',-1)">&#x2212;</button>
+          <span class="qty-num" id="mrp30mlCount">0</span>
+          <button class="qty-btn" onclick="popupQtyChange('30ml',1)">+</button>
+        </div>
+        <button id="mrp30mlAdd" class="inline-add-btn inline-add-hidden" onclick="popupQtyChange('30ml',1)">+</button>
+      </div>
+    </div>
     <div class="mrp-row mrp-row-hidden" id="mrpHalfRow">
       <span class="mrp-label" id="mrpHalfLabel">Half</span>
       <div class="mrp-qty-row">
@@ -393,6 +413,18 @@
           <button class="qty-btn" onclick="popupQtyChange('Half',1)">+</button>
         </div>
         <button id="mrpHalfAdd" class="inline-add-btn inline-add-hidden" onclick="popupQtyChange('Half',1)">+</button>
+      </div>
+    </div>
+    <div class="mrp-row mrp-row-hidden" id="mrp90mlRow">
+      <span class="mrp-label">90ml</span>
+      <div class="mrp-qty-row">
+        <span class="mrp-value" id="mrp90ml"></span>
+        <div id="mrp90mlSel" class="qty-sel qty-sel-hidden">
+          <button class="qty-btn" onclick="popupQtyChange('90ml',-1)">&#x2212;</button>
+          <span class="qty-num" id="mrp90mlCount">0</span>
+          <button class="qty-btn" onclick="popupQtyChange('90ml',1)">+</button>
+        </div>
+        <button id="mrp90mlAdd" class="inline-add-btn inline-add-hidden" onclick="popupQtyChange('90ml',1)">+</button>
       </div>
     </div>
     <div class="mrp-row mrp-row-hidden" id="mrpQtrRow">
