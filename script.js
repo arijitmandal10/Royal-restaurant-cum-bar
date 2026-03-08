@@ -186,9 +186,10 @@ function popupQtyChange(size,delta){
 
 function refreshPopupQty(){
   var items=getBill();
+  var prefixMap={'Full':'mrpFull','60ml':'mrp60ml','30ml':'mrp30ml','Half':'mrpHalf','90ml':'mrp90ml','Qtr':'mrpQtr','MRP':'mrpMrp'};
   Object.keys(_popupSizes).forEach(function(size){
     var entry=_popupSizes[size];var label=entry?entry.label||size:size;
-    var prefix=size==='Full'?'mrpFull':size==='60ml'?'mrp60ml':size==='Half'?'mrpHalf':size==='Qtr'?'mrpQtr':null;
+    var prefix=prefixMap[size]||null;
     if(!prefix)return;
     var key=_popupName+'||'+label;
     var found=items.find(function(i){return i.key===key;});
@@ -233,9 +234,11 @@ function showFoodPopup(name){
   document.getElementById('mrpHalfLabel').textContent='Half Plate';
   document.getElementById('mrpHalf').textContent=half?fmt(half):'';
   document.getElementById('mrp60mlRow').classList.add('mrp-row-hidden');
+  document.getElementById('mrp30mlRow').classList.add('mrp-row-hidden');
   document.getElementById('mrpHalfRow').classList.toggle('mrp-row-hidden',!half);
+  document.getElementById('mrp90mlRow').classList.add('mrp-row-hidden');
   document.getElementById('mrpQtrRow').classList.add('mrp-row-hidden');
-  showRow('mrpFull',!!price);showRow('mrp60ml',false);showRow('mrpHalf',!!half);showRow('mrpQtr',false);
+  showRow('mrpFull',!!price);showRow('mrp60ml',false);showRow('mrp30ml',false);showRow('mrpHalf',!!half);showRow('mrp90ml',false);showRow('mrpQtr',false);showRow('mrpMrp',false);
   document.getElementById('mrpOverlay').classList.add('overlay-visible');
   refreshPopupQty();
 }
@@ -249,14 +252,17 @@ function showLiquorPopup(name,size,tabId){
     var dineIn=(size&&beerDineIn[key+' '+size])?beerDineIn[key+' '+size]:lookup(beerDineIn,key);
     var cartSize=size||'Bottle';
     _popupSizes={};if(dineIn)_popupSizes['Full']={price:dineIn,label:cartSize};
+    if(beerMrp)_popupSizes['MRP']={price:beerMrp,label:'MRP'};
     document.getElementById('mrpMrpRow').classList.toggle('mrp-row-hidden',!beerMrp);
     document.getElementById('mrpMrpVal').textContent=beerMrp?fmt(beerMrp):'';
     document.getElementById('mrpFullLabel').textContent='Dine-In (Per Bottle)';
     document.getElementById('mrpFull').textContent=dineIn?fmt(dineIn):'\u2014';
     document.getElementById('mrp60mlRow').classList.add('mrp-row-hidden');
+    document.getElementById('mrp30mlRow').classList.add('mrp-row-hidden');
     document.getElementById('mrpHalfRow').classList.add('mrp-row-hidden');
+    document.getElementById('mrp90mlRow').classList.add('mrp-row-hidden');
     document.getElementById('mrpQtrRow').classList.add('mrp-row-hidden');
-    showRow('mrpFull',!!dineIn);showRow('mrp60ml',false);showRow('mrpHalf',false);showRow('mrpQtr',false);
+    showRow('mrpFull',!!dineIn);showRow('mrp60ml',false);showRow('mrp30ml',false);showRow('mrpHalf',false);showRow('mrp90ml',false);showRow('mrpQtr',false);showRow('mrpMrp',!!beerMrp);
   } else {
     var data=lookup(mrpData,key);var realMrp=lookup(bevcoMrp,key);
     document.getElementById('mrpMrpRow').classList.toggle('mrp-row-hidden',!realMrp);
@@ -265,21 +271,39 @@ function showLiquorPopup(name,size,tabId){
     if(data){
       var full=data[0],half=data[1],qtr=data[2];
       var sixtyMl=lookup(ml60Map,key)||Math.ceil((full/12.5)/10)*10;
+      var thirtyMl=sixtyMl?Math.ceil((sixtyMl/2)/5)*5:null;
+      var ninetyMl=qtr?Math.ceil((qtr/2)/5)*5:null;
       var whiskyOnly=(tabId==='tab-whisky'||tabId==='tab-vodka-rum');
-      if(whiskyOnly){_popupSizes={'Full':{price:full,label:'Full'},'60ml':{price:sixtyMl,label:'60ml'},'Half':{price:half,label:'Half'},'Qtr':{price:qtr,label:'Qtr'}};}
-      else{_popupSizes={'Full':{price:full,label:'Full'}};}
+      if(whiskyOnly){
+        _popupSizes={};
+        if(realMrp)_popupSizes['MRP']={price:realMrp,label:'MRP'};
+        _popupSizes['Full']={price:full,label:'Full'};_popupSizes['60ml']={price:sixtyMl,label:'60ml'};
+        if(thirtyMl)_popupSizes['30ml']={price:thirtyMl,label:'30ml'};
+        _popupSizes['Half']={price:half,label:'Half'};
+        if(ninetyMl)_popupSizes['90ml']={price:ninetyMl,label:'90ml'};
+        _popupSizes['Qtr']={price:qtr,label:'Qtr'};
+      } else {
+        _popupSizes={};
+        if(realMrp)_popupSizes['MRP']={price:realMrp,label:'MRP'};
+        _popupSizes['Full']={price:full,label:'Full'};
+      }
       document.getElementById('mrpFull').textContent=fmt(full);
       document.getElementById('mrp60mlRow').classList.toggle('mrp-row-hidden',!whiskyOnly);document.getElementById('mrp60ml').textContent=fmt(sixtyMl);
+      document.getElementById('mrp30mlRow').classList.toggle('mrp-row-hidden',!whiskyOnly||!thirtyMl);document.getElementById('mrp30ml').textContent=thirtyMl?fmt(thirtyMl):'';
       document.getElementById('mrpHalfRow').classList.toggle('mrp-row-hidden',!whiskyOnly);document.getElementById('mrpHalfLabel').textContent='Half Bottle';
       document.getElementById('mrpHalf').textContent=fmt(half);
+      document.getElementById('mrp90mlRow').classList.toggle('mrp-row-hidden',!whiskyOnly||!ninetyMl);document.getElementById('mrp90ml').textContent=ninetyMl?fmt(ninetyMl):'';
       document.getElementById('mrpQtrRow').classList.toggle('mrp-row-hidden',!whiskyOnly);document.getElementById('mrpQtr').textContent=fmt(qtr);
-      showRow('mrpFull',true);showRow('mrp60ml',whiskyOnly);showRow('mrpHalf',whiskyOnly);showRow('mrpQtr',whiskyOnly);
+      showRow('mrpFull',true);showRow('mrp60ml',whiskyOnly);showRow('mrp30ml',whiskyOnly&&!!thirtyMl);showRow('mrpHalf',whiskyOnly);showRow('mrp90ml',whiskyOnly&&!!ninetyMl);showRow('mrpQtr',whiskyOnly);showRow('mrpMrp',!!realMrp);
     } else {
+      if(realMrp)_popupSizes['MRP']={price:realMrp,label:'MRP'};
       document.getElementById('mrpFull').textContent='\u2014';
       document.getElementById('mrp60mlRow').classList.add('mrp-row-hidden');
+      document.getElementById('mrp30mlRow').classList.add('mrp-row-hidden');
       document.getElementById('mrpHalfRow').classList.add('mrp-row-hidden');
+      document.getElementById('mrp90mlRow').classList.add('mrp-row-hidden');
       document.getElementById('mrpQtrRow').classList.add('mrp-row-hidden');
-      showRow('mrpFull',false);showRow('mrp60ml',false);showRow('mrpHalf',false);showRow('mrpQtr',false);
+      showRow('mrpFull',false);showRow('mrp60ml',false);showRow('mrp30ml',false);showRow('mrpHalf',false);showRow('mrp90ml',false);showRow('mrpQtr',false);showRow('mrpMrp',!!realMrp);
     }
   }
   document.getElementById('mrpOverlay').classList.add('overlay-visible');
