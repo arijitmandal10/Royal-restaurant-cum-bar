@@ -320,7 +320,9 @@ document.addEventListener('click',function(e){
   // Close login popup
   var loginOv=document.getElementById('loginOverlay');
   if(loginOv&&loginOv.classList.contains('overlay-visible')&&e.target===loginOv){closeLoginPopup();}
-  // Close billing panel when clicking backdrop (billing is full screen, no backdrop - skip)
+  // Close payment method popup
+  var pmOv=document.getElementById('paymentMethodOverlay');
+  if(pmOv&&pmOv.classList.contains('overlay-visible')&&e.target===pmOv){closePaymentMethodPopup();}
 });
 
 // ── BILLING DATA ──
@@ -435,11 +437,19 @@ function createBill(){
   document.getElementById('discountToggleBtn').textContent='+ Discount';
   renderBillPanel();switchBillTab('pending');showToast('Bill created \u2713');
 }
-function markPaid(id){
+var _pendingPayId=null;
+function openPaymentMethodPopup(id){_pendingPayId=id;document.getElementById('paymentMethodOverlay').classList.add('overlay-visible');}
+function closePaymentMethodPopup(){_pendingPayId=null;document.getElementById('paymentMethodOverlay').classList.remove('overlay-visible');}
+function confirmPaymentMethod(method){
+  var id=_pendingPayId;closePaymentMethodPopup();if(!id)return;
   var pending=getPending();var bill=pending.find(function(b){return b.id===id;});if(!bill)return;
+  bill.paymentMethod=method;
   var hist=getHistory();hist.unshift(bill);localStorage.setItem(HIST_KEY,JSON.stringify(hist));
   savePending(pending.filter(function(b){return b.id!==id;}));
   closePendingDetail();renderPendingBills();updateCartBar();showToast('Marked as paid \u2713');
+}
+function markPaid(id){
+  openPaymentMethodPopup(id);
 }
 function editPendingBill(id){
   var pending=getPending();var bill=pending.find(function(b){return b.id===id;});if(!bill)return;
@@ -501,18 +511,66 @@ function renderPendingBills(){
   }).join('');
 }
 
+function formatBillAsText(bill){
+  var pm=bill.paymentMethod||'';
+  var pmLabel=pm==='cash'?'Cash':pm==='online'?'Online':pm==='both'?'Both':'';
+  var gross=bill.gross;
+  if(gross==null||gross===undefined)gross=bill.items.reduce(function(s,it){return s+(it.price*it.qty);},0);
+  var lines=['ROYAL RESTAURANT CUM BAR','Bill #'+(bill.billOn?bill.billOn:'')+' \u00b7 '+bill.time];
+  if(pmLabel)lines.push('Payment: '+pmLabel);
+  lines.push('','ITEM (SIZE)                    QTY    AMOUNT','-------------------------------------------');
+  bill.items.forEach(function(it){var n=escapeHtml(it.name)+' ('+escapeHtml(it.size)+')';while(n.length<35)n+=' ';lines.push(n+'  '+it.qty+'    '+fmt(it.price*it.qty));});
+  lines.push('-------------------------------------------','Subtotal                        '+fmt(gross));
+  if(bill.discount)lines.push('Discount                        \u2212 '+fmt(bill.discount));
+  lines.push('-------------------------------------------','NET TOTAL                       '+fmt(bill.net||bill.total||gross-(bill.discount||0)),'');
+  return lines.join('\n');
+}
+function downloadBillTxt(billOrBills,filename){
+  if(!isLoggedIn())return;
+  var bills=Array.isArray(billOrBills)?billOrBills:[billOrBills];
+  var txt=bills.map(function(b,i){return formatBillAsText(b)+(bills.length>1&&i<bills.length-1?'\n\n---\n\n':'');}).join('');
+  var blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();URL.revokeObjectURL(a.href);
+}
+function downloadBillPdf(billOrBills,filename){
+  if(!isLoggedIn())return;
+  var JsPDF=window.jspdf&&window.jspdf.jsPDF;
+  if(!JsPDF){showToast('PDF requires internet for first load');return;}
+  var bills=Array.isArray(billOrBills)?billOrBills:[billOrBills];
+  var doc=new JsPDF();
+  var y=15;
+  bills.forEach(function(bill,bi){
+    if(bi>0){doc.addPage();y=15;}
+    doc.setFontSize(14);doc.text('ROYAL RESTAURANT CUM BAR',14,y);y+=8;
+    doc.setFontSize(10);doc.text((bill.billOn?bill.billOn:'Bill')+' \u00b7 '+bill.time,14,y);y+=6;
+    if(bill.paymentMethod){doc.text('Payment: '+(bill.paymentMethod==='cash'?'Cash':bill.paymentMethod==='online'?'Online':'Both'),14,y);y+=6;}
+    y+=2;
+    doc.setFontSize(9);
+    bill.items.forEach(function(it){doc.text(escapeHtml(it.name)+' ('+escapeHtml(it.size)+') x'+it.qty,14,y);doc.text(fmt(it.price*it.qty),190,y,'right');y+=5;});
+    if(bill.discount){y+=2;doc.text('Discount \u2212 '+fmt(bill.discount),14,y);y+=5;}
+    y+=2;doc.setFontSize(10);doc.text('NET TOTAL: '+fmt(bill.net||bill.total||0),14,y);
+  });
+  doc.save(filename);
+}
+function downloadAllHistoryTxt(){var hist=getHistory();if(!hist.length){showToast('No history');return;}downloadBillTxt(hist,'royal-history-'+new Date().toISOString().slice(0,10)+'.txt');}
+function downloadAllHistoryPdf(){var hist=getHistory();if(!hist.length){showToast('No history');return;}downloadBillPdf(hist,'royal-history-'+new Date().toISOString().slice(0,10)+'.pdf');}
+function downloadBillByIdx(idx,ext){var hist=getHistory();var bill=hist[idx];if(!bill)return;if(ext==='txt')downloadBillTxt(bill,'bill-'+bill.id+'.txt');else downloadBillPdf(bill,'bill-'+bill.id+'.pdf');}
 function renderHistoryBills(){
-  var hist=getHistory();var c=document.getElementById('billHistoryList');if(!c)return;
+  var hist=getHistory();var c=document.getElementById('billHistoryList');var da=document.getElementById('historyDownloadActions');
+  if(!c)return;
+  if(da){da.classList.toggle('hidden',!isLoggedIn()||!hist.length);}
   if(!hist.length){c.innerHTML='<div class="empty-msg">No paid bills yet</div>';return;}
   c.innerHTML=hist.map(function(bill,i){
     var rows=bill.items.map(function(it){return '<div class="history-item-row">'+
       '<span>'+escapeHtml(it.name)+' ('+escapeHtml(it.size)+') \xd7'+it.qty+'</span><span class="history-item-amount">'+fmt(it.price*it.qty)+'</span></div>';}).join('');
     var disc=bill.discount?'<div class="history-discount-row"><span>Discount</span><span>\u2212 '+fmt(bill.discount)+'</span></div>':'';
+    var pm=bill.paymentMethod;var pmStr=pm==='cash'?' \u00b7 Cash':pm==='online'?' \u00b7 Online':pm==='both'?' \u00b7 Both':'';
+    var dlBtns=isLoggedIn()?'<div class="history-card-download"><button class="btn-history-card-dl" onclick="downloadBillByIdx('+i+',\'txt\')">TXT</button><button class="btn-history-card-dl" onclick="downloadBillByIdx('+i+',\'pdf\')">PDF</button></div>':'';
     return '<div class="history-card">'+
       '<div class="history-card-header">'+
-        '<span class="pending-card-meta">#'+(hist.length-i)+(bill.billOn?' \u00b7 '+bill.billOn:'')+' \u00b7 '+bill.time+' \u2714</span>'+
+        '<span class="pending-card-meta">#'+(hist.length-i)+(bill.billOn?' \u00b7 '+bill.billOn:'')+' \u00b7 '+bill.time+pmStr+' \u2714</span>'+
         '<span class="pending-card-amount">'+fmt(bill.net||bill.total||0)+'</span>'+
-      '</div>'+rows+disc+'</div>';
+      '</div>'+rows+disc+dlBtns+'</div>';
   }).join('');
 }
 
