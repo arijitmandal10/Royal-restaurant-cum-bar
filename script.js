@@ -435,6 +435,8 @@ function createBill(){
   if(discEl)discEl.value='';if(billOnEl)billOnEl.value='';
   document.getElementById('discountRow').classList.add('hidden');
   document.getElementById('discountToggleBtn').textContent='+ Discount';
+  _editingFromPending=false;
+  var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} Create Bill';
   renderBillPanel();switchBillTab('pending');showToast('Bill created \u2713');
 }
 var _pendingPayId=null;
@@ -457,6 +459,8 @@ function editPendingBill(id){
   var billOnEl=document.getElementById('billOnInput');if(billOnEl)billOnEl.value=bill.billOn||'';
   var discEl=document.getElementById('discountInput');var discRow=document.getElementById('discountRow');var discBtn=document.getElementById('discountToggleBtn');
   if(bill.discount&&bill.discount>0){if(discEl)discEl.value=bill.discount;if(discRow)discRow.classList.remove('hidden');if(discBtn)discBtn.textContent='\u2715 Discount';}
+  _editingFromPending=true;
+  var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} Update Bill';
   closePendingDetail();renderBillPanel();switchBillTab('current');showSearchInBilling();showToast('Bill loaded for editing');
 }
 function deletePendingBill(id){
@@ -617,7 +621,7 @@ function renderHistoryBills(){
   c.innerHTML=html;
 }
 
-var billingEditMode=false;
+var billingEditMode=false,_editingFromPending=false;
 function showSearchInBilling(){
   var sect=document.getElementById('billMenuSection');var sw=document.querySelector('.search-wrap');var sr=document.getElementById('searchResults');
   if(!sect||!sw||!sr)return;
@@ -652,7 +656,7 @@ function clearAllData(){
   renderBillPanel();updateCartBar();showToast('All data cleared');
 }
 function openBilling(){var p=document.getElementById('billingPanel');if(!p)return;p.classList.remove('hidden');switchBillTab('current');renderBillPanel();}
-function closeBilling(){var p=document.getElementById('billingPanel');if(p){hideSearchInBilling();p.classList.add('hidden');}}
+function closeBilling(){var p=document.getElementById('billingPanel');if(p){hideSearchInBilling();p.classList.add('hidden');}_editingFromPending=false;var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} Create Bill';}
 
 function showToast(msg){
   var t=document.getElementById('toastMsg');
