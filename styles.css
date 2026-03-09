@@ -269,6 +269,8 @@ input[type=password] { width:100%;padding:10px 14px;border:1.5px solid var(--bor
 .pending-card-amount { color:var(--gold-light);font-weight:700;font-size:18px; }
 .pending-card-preview { padding:10px 14px;font-size:15px;color:var(--text-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
 .history-download-actions { display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap; }
+.history-date-section { margin-bottom:20px; }
+.history-date-header { font-size:14px;font-weight:700;color:var(--navy);margin-bottom:10px;padding:8px 12px;background:var(--gold-pale2);border-radius:4px;border-left:4px solid var(--gold); }
 .history-download-actions.hidden { display:none !important; }
 .btn-history-download { padding:10px 16px;background:var(--navy);color:var(--gold-light);border:none;border-radius:3px;font-size:13px;font-weight:700;cursor:pointer; }
 .btn-history-download:hover { background:var(--navy-light); }
