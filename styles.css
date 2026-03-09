@@ -159,6 +159,8 @@ footer { text-align: center; background: var(--navy-dark); color: rgba(201,168,7
 .mrp-value { font-size:17px;font-weight:700;color:var(--navy); }
 .popup-error { color:#c0392b;font-size:12px;margin-top:6px;min-height:16px; }
 .popup-btn { width:100%;margin-top:14px;padding:11px;background:var(--navy);color:var(--gold-light);border:none;border-radius:3px;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer; }
+.payment-method-btns { display:flex;gap:10px;margin-top:16px; }
+.payment-method-btn { flex:1;width:auto;margin-top:0; }
 input[type=password] { width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:3px;font-size:16px;letter-spacing:4px;margin-top:8px;outline:none;font-family:monospace; }
 /* Qty selector */
 .qty-sel { display:flex;align-items:center;gap:4px; }
@@ -266,7 +268,14 @@ input[type=password] { width:100%;padding:10px 14px;border:1.5px solid var(--bor
 .pending-card-meta { color:var(--gold-light);font-size:15px;font-weight:600; }
 .pending-card-amount { color:var(--gold-light);font-weight:700;font-size:18px; }
 .pending-card-preview { padding:10px 14px;font-size:15px;color:var(--text-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.history-download-actions { display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap; }
+.history-download-actions.hidden { display:none !important; }
+.btn-history-download { padding:10px 16px;background:var(--navy);color:var(--gold-light);border:none;border-radius:3px;font-size:13px;font-weight:700;cursor:pointer; }
+.btn-history-download:hover { background:var(--navy-light); }
 .history-card { background:var(--cream);border:1px solid var(--border);border-radius:4px;margin-bottom:12px;overflow:hidden; }
+.history-card-download { display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);background:rgba(10,16,40,0.04); }
+.btn-history-card-dl { padding:6px 12px;background:var(--navy);color:var(--gold-light);border:none;border-radius:3px;font-size:12px;font-weight:600;cursor:pointer; }
+.btn-history-card-dl:hover { background:var(--navy-light); }
 .history-card-header { background:var(--navy-dark);padding:9px 14px;display:flex;justify-content:space-between;align-items:center; }
 .history-item-row { display:flex;justify-content:space-between;padding:5px 14px;font-size:15px;color:var(--text-light); }
 .history-item-amount { font-weight:600; }
