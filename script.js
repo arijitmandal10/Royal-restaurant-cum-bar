@@ -119,23 +119,25 @@ function initAuth(){
 }
 function showLoggedIn(){
   var loginBtn=document.getElementById('empLoginBtn'),status=document.getElementById('empStatus');
-  var dot=document.getElementById('empDot'),cartBar=document.getElementById('cartBar'),cartBtn=document.getElementById('cartIconBtn');
+  var dot=document.getElementById('empDot'),cartBar=document.getElementById('cartBar'),cartBtn=document.getElementById('cartIconBtn'),tableBtn=document.getElementById('tableIconBtn');
   if(loginBtn)loginBtn.classList.add('hidden');
   if(status){status.classList.remove('hidden');status.classList.add('visible');}
   if(dot)dot.classList.remove('hidden');
   if(cartBar)cartBar.classList.remove('hidden');
   if(cartBtn)cartBtn.classList.remove('hidden');
+  if(tableBtn)tableBtn.classList.remove('hidden');
   updateCartBar();
 }
 function logout(){
   localStorage.removeItem(EMP_KEY);
   var loginBtn=document.getElementById('empLoginBtn'),status=document.getElementById('empStatus');
-  var dot=document.getElementById('empDot'),cartBar=document.getElementById('cartBar'),cartBtn=document.getElementById('cartIconBtn');
+  var dot=document.getElementById('empDot'),cartBar=document.getElementById('cartBar'),cartBtn=document.getElementById('cartIconBtn'),tableBtn=document.getElementById('tableIconBtn');
   if(loginBtn)loginBtn.classList.remove('hidden');
   if(status){status.classList.add('hidden');status.classList.remove('visible');}
   if(dot)dot.classList.add('hidden');
   if(cartBar)cartBar.classList.add('hidden');
   if(cartBtn)cartBtn.classList.add('hidden');
+  if(tableBtn)tableBtn.classList.add('hidden');
   updateCartBar();
   showToast('Logged out');
 }
@@ -323,15 +325,30 @@ document.addEventListener('click',function(e){
   // Close payment method popup
   var pmOv=document.getElementById('paymentMethodOverlay');
   if(pmOv&&pmOv.classList.contains('overlay-visible')&&e.target===pmOv){closePaymentMethodPopup();}
+  // Close create table popup
+  var ctOv=document.getElementById('createTableOverlay');
+  if(ctOv&&ctOv.classList.contains('overlay-visible')&&e.target===ctOv){closeCreateTablePopup();}
+  // Close table options popup
+  var toOv=document.getElementById('tableOptionsOverlay');
+  if(toOv&&toOv.classList.contains('overlay-visible')&&e.target===toOv){closeTableOptionsPopup();}
 });
 
 // ── BILLING DATA ──
-var BILL_KEY='royal_current_bill',HIST_KEY='royal_bill_history',PEND_KEY='royal_pending_bills';
+var BILL_KEY='royal_current_bill',HIST_KEY='royal_bill_history',PEND_KEY='royal_pending_bills',TABLES_KEY='royal_empty_tables';
 function getBill(){try{return JSON.parse(localStorage.getItem(BILL_KEY))||[];}catch(e){return [];}}
 function saveBill(items){localStorage.setItem(BILL_KEY,JSON.stringify(items));}
 function getHistory(){try{return JSON.parse(localStorage.getItem(HIST_KEY))||[];}catch(e){return [];}}
 function getPending(){try{return JSON.parse(localStorage.getItem(PEND_KEY))||[];}catch(e){return [];}}
 function savePending(p){localStorage.setItem(PEND_KEY,JSON.stringify(p));}
+function getEmptyTables(){try{return JSON.parse(localStorage.getItem(TABLES_KEY))||[];}catch(e){return [];}}
+function saveEmptyTables(t){localStorage.setItem(TABLES_KEY,JSON.stringify(t));}
+function getAllTables(){
+  var pending=getPending(),empty=getEmptyTables();
+  var fromPending={};
+  pending.forEach(function(b){var n=(b.billOn||'').trim();if(n)fromPending[n]=true;});
+  empty.forEach(function(n){if(n)fromPending[n]=true;});
+  return Object.keys(fromPending);
+}
 
 function addToCart(name,price,size){
   var items=getBill();var key=name+'||'+size;
@@ -409,7 +426,7 @@ function renderBillPanel(){
 }
 function changeQty(idx,delta){var items=getBill();if(!items[idx])return;items[idx].qty=Math.max(1,items[idx].qty+delta);saveBill(items);renderBillPanel();}
 function setQty(idx,val){var items=getBill();if(!items[idx])return;var n=parseInt(val);if(!isNaN(n)&&n>=1){items[idx].qty=n;saveBill(items);renderBillPanel();}}
-function removeItem(idx){var items=getBill();items.splice(idx,1);saveBill(items);renderBillPanel();}
+function removeItem(idx){if(!confirm('Remove this item?'))return;var items=getBill();items.splice(idx,1);saveBill(items);renderBillPanel();}
 
 function toggleDiscount(){
   var row=document.getElementById('discountRow');var btn=document.getElementById('discountToggleBtn');
@@ -429,15 +446,25 @@ function createBill(){
   var discEl=document.getElementById('discountInput');var disc=discEl?(parseInt(discEl.value)||0):0;
   var net=Math.max(0,gross-disc);
   var billOnEl=document.getElementById('billOnInput');var billOn=billOnEl?billOnEl.value.trim():'';
+  if(!billOn){
+    var cnt=parseInt(localStorage.getItem('royal_bill_counter')||'0',10)+1;
+    localStorage.setItem('royal_bill_counter',String(cnt));
+    billOn='Bill #'+cnt;
+  }
+  if(billOn){
+    var empty=getEmptyTables();
+    if(empty.indexOf(billOn)>=0){empty=empty.filter(function(n){return n!==billOn;});saveEmptyTables(empty);}
+  }
   var pending=getPending();
   pending.unshift({id:Date.now(),time:new Date().toLocaleString('en-IN'),billOn:billOn,items:JSON.parse(JSON.stringify(items)),gross:gross,discount:disc,net:net});
   savePending(pending);localStorage.removeItem(BILL_KEY);
   if(discEl)discEl.value='';if(billOnEl)billOnEl.value='';
   document.getElementById('discountRow').classList.add('hidden');
   document.getElementById('discountToggleBtn').textContent='+ Discount';
-  _editingFromPending=false;
+  _editingFromPending=false;_editingFromTable=false;
   var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} Create Bill';
   renderBillPanel();switchBillTab('pending');showToast('Bill created \u2713');
+  if(typeof renderTablesGrid==='function')renderTablesGrid();
 }
 var _pendingPayId=null;
 function openPaymentMethodPopup(id){_pendingPayId=id;document.getElementById('paymentMethodOverlay').classList.add('overlay-visible');}
@@ -449,6 +476,7 @@ function confirmPaymentMethod(method){
   var hist=getHistory();hist.unshift(bill);localStorage.setItem(HIST_KEY,JSON.stringify(hist));
   savePending(pending.filter(function(b){return b.id!==id;}));
   closePendingDetail();renderPendingBills();updateCartBar();showToast('Marked as paid \u2713');
+  if(typeof renderTablesGrid==='function')renderTablesGrid();
 }
 function markPaid(id){
   openPaymentMethodPopup(id);
@@ -459,7 +487,7 @@ function editPendingBill(id){
   var billOnEl=document.getElementById('billOnInput');if(billOnEl)billOnEl.value=bill.billOn||'';
   var discEl=document.getElementById('discountInput');var discRow=document.getElementById('discountRow');var discBtn=document.getElementById('discountToggleBtn');
   if(bill.discount&&bill.discount>0){if(discEl)discEl.value=bill.discount;if(discRow)discRow.classList.remove('hidden');if(discBtn)discBtn.textContent='\u2715 Discount';}
-  _editingFromPending=true;
+  _editingFromPending=true;_editingFromTable=false;
   var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} Update Bill';
   closePendingDetail();renderBillPanel();switchBillTab('current');showSearchInBilling();showToast('Bill loaded for editing');
 }
@@ -467,6 +495,7 @@ function deletePendingBill(id){
   if(!confirm('Delete this pending bill?'))return;
   savePending(getPending().filter(function(b){return b.id!==id;}));
   closePendingDetail();renderPendingBills();updateCartBar();
+  if(typeof renderTablesGrid==='function')renderTablesGrid();
 }
 
 // ── PENDING BILL DETAIL (full screen) ──
@@ -513,6 +542,115 @@ function renderPendingBills(){
       '<div class="pending-card-preview">'+preview+'</div>'+
     '</div>';
   }).join('');
+}
+
+// ── TABLES (COT/BOT) ──
+function openTablesPanel(){
+  if(!isLoggedIn())return;
+  var p=document.getElementById('tablesPanel');if(!p)return;
+  p.classList.remove('hidden');
+  renderTablesGrid();
+}
+function closeTablesPanel(){
+  var p=document.getElementById('tablesPanel');if(p)p.classList.add('hidden');
+}
+function renderTablesGrid(){
+  var grid=document.getElementById('tablesGrid');if(!grid)return;
+  var tables=getAllTables();
+  if(!tables.length){grid.innerHTML='<div class="empty-msg">No tables yet. Create a table or create a bill with a table name.</div>';return;}
+  var pending=getPending(),empty=getEmptyTables();
+  var hasPending=function(n){return pending.some(function(b){return (b.billOn||'').trim()===n;});};
+  var isEmpty=function(n){return empty.indexOf(n)>=0;};
+  grid.innerHTML=tables.map(function(name){
+    var isEmp=isEmpty(name);
+    var attrVal=(name||'').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    var delBtn=isEmp?'<button class="table-card-del" onclick="event.stopPropagation();deleteEmptyTable(this.parentElement.dataset.tableName)">\u2715</button>':'';
+    return '<div class="table-card" data-table-name="'+attrVal+'" onclick="openTableOptionsPopup(this.dataset.tableName)">'+delBtn+'<span class="table-card-name">'+escapeHtml(name)+'</span></div>';
+  }).join('');
+}
+function openCreateTablePopup(){
+  var ov=document.getElementById('createTableOverlay'),inp=document.getElementById('createTableInput');
+  if(ov)ov.classList.add('overlay-visible');
+  if(inp){inp.value='';inp.focus();}
+}
+function closeCreateTablePopup(){
+  var ov=document.getElementById('createTableOverlay');
+  if(ov)ov.classList.remove('overlay-visible');
+}
+function submitCreateTable(){
+  var inp=document.getElementById('createTableInput');
+  var name=inp?inp.value.trim():'';
+  if(!name){showToast('Enter table name');return;}
+  createTable(name);
+  closeCreateTablePopup();
+  renderTablesGrid();
+  showToast('Table '+name+' created');
+}
+function createTable(name){
+  var empty=getEmptyTables();
+  if(empty.indexOf(name)<0)empty.push(name);
+  saveEmptyTables(empty);
+}
+var _tableOptionsTableName='',_tableOptionsBillId=null;
+function openTableOptionsPopup(tableName){
+  if(!isLoggedIn())return;
+  _tableOptionsTableName=tableName;_tableOptionsBillId=null;
+  var pending=getPending(),bill=pending.find(function(b){return (b.billOn||'').trim()===tableName;});
+  if(bill)_tableOptionsBillId=bill.id;
+  var titleEl=document.getElementById('tableOptionsTitle'),bodyEl=document.getElementById('tableOptionsBody'),actionsEl=document.getElementById('tableOptionsActions');
+  if(!titleEl||!bodyEl||!actionsEl)return;
+  titleEl.textContent=tableName;
+  if(bill){
+    var rows=bill.items.map(function(i){
+      return '<tr><td class="pending-detail-td">'+escapeHtml(i.name)+'<div class="pending-detail-size">'+escapeHtml(i.size)+'</div></td>'+
+        '<td class="pending-detail-td-center">\xd7'+i.qty+'</td>'+
+        '<td class="pending-detail-td-right">'+fmt(i.price*i.qty)+'</td></tr>';
+    }).join('');
+    var disc=bill.discount?'<tr><td colspan="2" class="pending-detail-discount">Discount</td><td class="pending-detail-discount pending-detail-td-right">\u2212 '+fmt(bill.discount)+'</td></tr>':'';
+    bodyEl.innerHTML='<table class="pending-detail-table">'+
+      '<tr><th class="pending-detail-th">ITEM</th><th class="pending-detail-th pending-detail-th-center">QTY</th><th class="pending-detail-th pending-detail-th-right">AMOUNT</th></tr>'+
+      rows+disc+
+      '<tr class="pending-detail-total"><td colspan="2">TOTAL</td><td class="pending-detail-td-right">'+fmt(bill.net)+'</td></tr></table>';
+    bodyEl.classList.remove('hidden');
+  } else {
+    bodyEl.innerHTML='';
+    bodyEl.classList.add('hidden');
+  }
+  actionsEl.innerHTML='<button class="popup-btn table-options-btn" onclick="closeTableOptionsPopup();openTableForEdit(_tableOptionsTableName)">\u270E Edit items</button>'+
+    (bill?'<button class="popup-btn table-options-btn btn-pending-pay" onclick="closeTableOptionsPopup();closeTablesPanel();markPaid(_tableOptionsBillId)">\u2714 Mark as paid</button>':'');
+  var ov=document.getElementById('tableOptionsOverlay');
+  if(ov)ov.classList.add('overlay-visible');
+}
+function closeTableOptionsPopup(){
+  var ov=document.getElementById('tableOptionsOverlay');
+  if(ov)ov.classList.remove('overlay-visible');
+}
+function deleteEmptyTable(name){
+  if(!confirm('Remove this table?'))return;
+  var empty=getEmptyTables().filter(function(n){return n!==name;});
+  saveEmptyTables(empty);
+  renderTablesGrid();
+  showToast('Table removed');
+}
+function openTableForEdit(tableName){
+  if(!isLoggedIn())return;
+  closeTablesPanel();
+  openBilling();
+  var pending=getPending(),bill=pending.find(function(b){return (b.billOn||'').trim()===tableName;});
+  if(bill){
+    _editingFromPending=true;_editingFromTable=true;
+    editPendingBill(bill.id);
+    var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} Update Table';
+  } else {
+    saveBill([]);
+    var billOnEl=document.getElementById('billOnInput');if(billOnEl)billOnEl.value=tableName;
+    var discEl=document.getElementById('discountInput');var discRow=document.getElementById('discountRow');var discBtn=document.getElementById('discountToggleBtn');
+    if(discEl)discEl.value='';if(discRow)discRow.classList.add('hidden');if(discBtn)discBtn.textContent='+ Discount';
+    _editingFromPending=false;_editingFromTable=false;
+    switchBillTab('current');
+    renderBillPanel();
+    showSearchInBilling();
+  }
 }
 
 function getDateKey(bill){
@@ -621,7 +759,7 @@ function renderHistoryBills(){
   c.innerHTML=html;
 }
 
-var billingEditMode=false,_editingFromPending=false;
+var billingEditMode=false,_editingFromPending=false,_editingFromTable=false;
 function showSearchInBilling(){
   var sect=document.getElementById('billMenuSection');var sw=document.querySelector('.search-wrap');var sr=document.getElementById('searchResults');
   if(!sect||!sw||!sr)return;
@@ -652,11 +790,12 @@ function switchBillTab(tab){
 }
 function clearAllData(){
   if(!confirm('Clear all billing data?'))return;
-  localStorage.removeItem(BILL_KEY);localStorage.removeItem(HIST_KEY);localStorage.removeItem(PEND_KEY);
+  localStorage.removeItem(BILL_KEY);localStorage.removeItem(HIST_KEY);localStorage.removeItem(PEND_KEY);localStorage.removeItem(TABLES_KEY);localStorage.removeItem('royal_bill_counter');
   renderBillPanel();updateCartBar();showToast('All data cleared');
+  if(typeof renderTablesGrid==='function')renderTablesGrid();
 }
 function openBilling(){var p=document.getElementById('billingPanel');if(!p)return;p.classList.remove('hidden');switchBillTab('current');renderBillPanel();}
-function closeBilling(){var p=document.getElementById('billingPanel');if(p){hideSearchInBilling();p.classList.add('hidden');}_editingFromPending=false;var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} Create Bill';}
+function closeBilling(){var p=document.getElementById('billingPanel');if(p){hideSearchInBilling();p.classList.add('hidden');}_editingFromPending=false;_editingFromTable=false;var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} Create Bill';}
 
 function showToast(msg){
   var t=document.getElementById('toastMsg');
