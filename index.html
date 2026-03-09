@@ -349,6 +349,19 @@
   </div>
 </div>
 
+<!-- Payment Method Popup -->
+<div class="overlay" id="paymentMethodOverlay">
+  <div class="popup">
+    <button class="popup-close" onclick="closePaymentMethodPopup()">&#x2715;</button>
+    <div class="popup-title">Payment method?</div>
+    <div class="payment-method-btns">
+      <button class="popup-btn payment-method-btn" onclick="confirmPaymentMethod('cash')">Cash</button>
+      <button class="popup-btn payment-method-btn" onclick="confirmPaymentMethod('online')">Online</button>
+      <button class="popup-btn payment-method-btn" onclick="confirmPaymentMethod('both')">Both</button>
+    </div>
+  </div>
+</div>
+
 <!-- Item Info Popup -->
 <div class="overlay" id="mrpOverlay">
   <div class="popup popup-wide">
@@ -518,6 +531,10 @@
 
     <!-- History -->
     <div id="billPane-history" class="bill-pane hidden">
+      <div class="history-download-actions hidden" id="historyDownloadActions">
+        <button class="btn-history-download" onclick="downloadAllHistoryTxt()">Download All (TXT)</button>
+        <button class="btn-history-download" onclick="downloadAllHistoryPdf()">Download All (PDF)</button>
+      </div>
       <div id="billHistoryList"></div>
     </div>
   </div>
@@ -552,6 +569,7 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
