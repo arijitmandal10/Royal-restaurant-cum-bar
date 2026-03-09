@@ -511,67 +511,110 @@ function renderPendingBills(){
   }).join('');
 }
 
-function formatBillAsText(bill){
-  var pm=bill.paymentMethod||'';
-  var pmLabel=pm==='cash'?'Cash':pm==='online'?'Online':pm==='both'?'Both':'';
-  var gross=bill.gross;
-  if(gross==null||gross===undefined)gross=bill.items.reduce(function(s,it){return s+(it.price*it.qty);},0);
-  var lines=['ROYAL RESTAURANT CUM BAR','Bill #'+(bill.billOn?bill.billOn:'')+' \u00b7 '+bill.time];
-  if(pmLabel)lines.push('Payment: '+pmLabel);
-  lines.push('','ITEM (SIZE)                    QTY    AMOUNT','-------------------------------------------');
-  bill.items.forEach(function(it){var n=escapeHtml(it.name)+' ('+escapeHtml(it.size)+')';while(n.length<35)n+=' ';lines.push(n+'  '+it.qty+'    '+fmt(it.price*it.qty));});
-  lines.push('-------------------------------------------','Subtotal                        '+fmt(gross));
-  if(bill.discount)lines.push('Discount                        \u2212 '+fmt(bill.discount));
-  lines.push('-------------------------------------------','NET TOTAL                       '+fmt(bill.net||bill.total||gross-(bill.discount||0)),'');
-  return lines.join('\n');
+function getDateKey(bill){
+  var d=new Date(bill.time);
+  if(isNaN(d.getTime()))return (bill.time||'').split(',')[0]||'';
+  return d.getFullYear()+'-'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1)+'-'+(d.getDate()<10?'0':'')+d.getDate();
 }
-function downloadBillTxt(billOrBills,filename){
+function formatBillDateTime(bill){
+  var raw=bill.time||'';
+  var d=new Date(raw);
+  if(isNaN(d.getTime())&&raw.indexOf(',')>=0){
+    var parts=raw.split(',');
+    d=new Date(parts[0]+(parts[1]?' '+parts[1].trim():''));
+  }
+  if(isNaN(d.getTime())){
+    var dp=(raw.split(',')[0]||'').trim();
+    var tp=raw.indexOf(',')>=0?raw.substring(raw.indexOf(',')+1).trim():'';
+    return{datePart:dp,timePart:tp};
+  }
+  var day=d.getDate(),mon=d.getMonth()+1,yr=d.getFullYear();
+  var datePart=(day<10?'0':'')+day+'-'+(mon<10?'0':'')+mon+'-'+yr;
+  var hrs=d.getHours(),mins=d.getMinutes();
+  var ampm=hrs>=12?'PM':'AM';
+  hrs=hrs%12||12;
+  var timePart=(hrs<10?'0':'')+hrs+':'+(mins<10?'0':'')+mins+' '+ampm;
+  return{datePart:datePart,timePart:timePart};
+}
+function getDateWiseTotals(bills){
+  var map={};
+  bills.forEach(function(b){
+    var k=getDateKey(b);
+    var n=b.net||b.total||0;
+    map[k]=(map[k]||0)+n;
+  });
+  return map;
+}
+function csvEscape(s){if(s==null||s===undefined)return'';var x=String(s);if(x.indexOf(',')>=0||x.indexOf('"')>=0||x.indexOf('\n')>=0)return'"'+x.replace(/"/g,'""')+'"';return x;}
+function formatBillsAsCsv(bills){
+  var lines=['Date,Time,Bill On,Payment,Item,Size,Qty,Unit Price,Amount,Net'];
+  var dateTotals={};
+  function parseDDMMYYYY(s){
+    var p=s.split('-');
+    if(p.length!==3)return new Date(0);
+    return new Date(parseInt(p[2],10),parseInt(p[1],10)-1,parseInt(p[0],10));
+  }
+  bills.forEach(function(bill){
+    var net=bill.net||bill.total||bill.items.reduce(function(s,it){return s+it.price*it.qty;},0)-(bill.discount||0);
+    var pm=bill.paymentMethod==='cash'?'Cash':bill.paymentMethod==='online'?'Online':bill.paymentMethod==='both'?'Both':'';
+    var dt=formatBillDateTime(bill);
+    var datePart=dt.datePart,timePart=dt.timePart;
+    if(bill.items.length){
+      bill.items.forEach(function(it,idx){
+        var amt=it.price*it.qty;
+        var netVal=idx===0?net:'';
+        var dateCol=idx===0?csvEscape(datePart):'',timeCol=idx===0?csvEscape(timePart):'',billOnCol=idx===0?csvEscape(bill.billOn||''):'',pmCol=idx===0?csvEscape(pm):'';
+        lines.push(dateCol+','+timeCol+','+billOnCol+','+pmCol+','+csvEscape(it.name)+','+csvEscape(it.size)+','+it.qty+','+it.price+','+amt+','+(netVal===''?'':netVal));
+      });
+    }else{lines.push(csvEscape(datePart)+','+csvEscape(timePart)+','+csvEscape(bill.billOn||'')+','+csvEscape(pm)+',,,,,'+net);}
+    lines.push('');
+    dateTotals[datePart]=(dateTotals[datePart]||0)+net;
+  });
+  lines.push('','Date,Day Total');
+  Object.keys(dateTotals).sort(function(a,b){return parseDDMMYYYY(a).getTime()-parseDDMMYYYY(b).getTime();}).forEach(function(d){lines.push(csvEscape(d)+','+dateTotals[d]);});
+  return lines.join('\r\n');
+}
+function downloadBillCsv(billOrBills,filename){
   if(!isLoggedIn())return;
   var bills=Array.isArray(billOrBills)?billOrBills:[billOrBills];
-  var txt=bills.map(function(b,i){return formatBillAsText(b)+(bills.length>1&&i<bills.length-1?'\n\n---\n\n':'');}).join('');
-  var blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
+  var csv=formatBillsAsCsv(bills);
+  var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();URL.revokeObjectURL(a.href);
 }
-function downloadBillPdf(billOrBills,filename){
-  if(!isLoggedIn())return;
-  var JsPDF=window.jspdf&&window.jspdf.jsPDF;
-  if(!JsPDF){showToast('PDF requires internet for first load');return;}
-  var bills=Array.isArray(billOrBills)?billOrBills:[billOrBills];
-  var doc=new JsPDF();
-  var y=15;
-  bills.forEach(function(bill,bi){
-    if(bi>0){doc.addPage();y=15;}
-    doc.setFontSize(14);doc.text('ROYAL RESTAURANT CUM BAR',14,y);y+=8;
-    doc.setFontSize(10);doc.text((bill.billOn?bill.billOn:'Bill')+' \u00b7 '+bill.time,14,y);y+=6;
-    if(bill.paymentMethod){doc.text('Payment: '+(bill.paymentMethod==='cash'?'Cash':bill.paymentMethod==='online'?'Online':'Both'),14,y);y+=6;}
-    y+=2;
-    doc.setFontSize(9);
-    bill.items.forEach(function(it){doc.text(escapeHtml(it.name)+' ('+escapeHtml(it.size)+') x'+it.qty,14,y);doc.text(fmt(it.price*it.qty),190,y,'right');y+=5;});
-    if(bill.discount){y+=2;doc.text('Discount \u2212 '+fmt(bill.discount),14,y);y+=5;}
-    y+=2;doc.setFontSize(10);doc.text('NET TOTAL: '+fmt(bill.net||bill.total||0),14,y);
-  });
-  doc.save(filename);
-}
-function downloadAllHistoryTxt(){var hist=getHistory();if(!hist.length){showToast('No history');return;}downloadBillTxt(hist,'royal-history-'+new Date().toISOString().slice(0,10)+'.txt');}
-function downloadAllHistoryPdf(){var hist=getHistory();if(!hist.length){showToast('No history');return;}downloadBillPdf(hist,'royal-history-'+new Date().toISOString().slice(0,10)+'.pdf');}
-function downloadBillByIdx(idx,ext){var hist=getHistory();var bill=hist[idx];if(!bill)return;if(ext==='txt')downloadBillTxt(bill,'bill-'+bill.id+'.txt');else downloadBillPdf(bill,'bill-'+bill.id+'.pdf');}
+function downloadAllHistoryCsv(){var hist=getHistory();if(!hist.length){showToast('No history');return;}downloadBillCsv(hist,'royal-logbook-'+new Date().toISOString().slice(0,10)+'.csv');}
+function downloadBillByIdx(idx){var hist=getHistory();var bill=hist[idx];if(!bill)return;downloadBillCsv(bill,'bill-'+bill.id+'.csv');}
 function renderHistoryBills(){
   var hist=getHistory();var c=document.getElementById('billHistoryList');var da=document.getElementById('historyDownloadActions');
   if(!c)return;
   if(da){da.classList.toggle('hidden',!isLoggedIn()||!hist.length);}
   if(!hist.length){c.innerHTML='<div class="empty-msg">No paid bills yet</div>';return;}
-  c.innerHTML=hist.map(function(bill,i){
-    var rows=bill.items.map(function(it){return '<div class="history-item-row">'+
-      '<span>'+escapeHtml(it.name)+' ('+escapeHtml(it.size)+') \xd7'+it.qty+'</span><span class="history-item-amount">'+fmt(it.price*it.qty)+'</span></div>';}).join('');
-    var disc=bill.discount?'<div class="history-discount-row"><span>Discount</span><span>\u2212 '+fmt(bill.discount)+'</span></div>':'';
-    var pm=bill.paymentMethod;var pmStr=pm==='cash'?' \u00b7 Cash':pm==='online'?' \u00b7 Online':pm==='both'?' \u00b7 Both':'';
-    var dlBtns=isLoggedIn()?'<div class="history-card-download"><button class="btn-history-card-dl" onclick="downloadBillByIdx('+i+',\'txt\')">TXT</button><button class="btn-history-card-dl" onclick="downloadBillByIdx('+i+',\'pdf\')">PDF</button></div>':'';
-    return '<div class="history-card">'+
-      '<div class="history-card-header">'+
-        '<span class="pending-card-meta">#'+(hist.length-i)+(bill.billOn?' \u00b7 '+bill.billOn:'')+' \u00b7 '+bill.time+pmStr+' \u2714</span>'+
-        '<span class="pending-card-amount">'+fmt(bill.net||bill.total||0)+'</span>'+
-      '</div>'+rows+disc+dlBtns+'</div>';
-  }).join('');
+  var byDate={};
+  hist.forEach(function(bill){var k=getDateKey(bill);if(!byDate[k])byDate[k]=[];byDate[k].push(bill);});
+  var dates=Object.keys(byDate).sort().reverse();
+  var globalIdx=0;
+  var html='';
+  dates.forEach(function(dateKey){
+    var bills=byDate[dateKey];
+    var dayTotal=bills.reduce(function(s,b){return s+(b.net||b.total||0);},0);
+    var parts=dateKey.split('-');
+    var dateLabel=parts.length>=3?parts[2]+'/'+parts[1]+'/'+parts[0]:dateKey;
+    html+='<div class="history-date-section"><div class="history-date-header">'+dateLabel+' \u00b7 Day Total: '+fmt(dayTotal)+'</div>';
+    bills.forEach(function(bill){
+      var i=hist.indexOf(bill);
+      var rows=bill.items.map(function(it){return '<div class="history-item-row">'+
+        '<span>'+escapeHtml(it.name)+' ('+escapeHtml(it.size)+') \xd7'+it.qty+'</span><span class="history-item-amount">'+fmt(it.price*it.qty)+'</span></div>';}).join('');
+      var disc=bill.discount?'<div class="history-discount-row"><span>Discount</span><span>\u2212 '+fmt(bill.discount)+'</span></div>':'';
+      var pm=bill.paymentMethod;var pmStr=pm==='cash'?' \u00b7 Cash':pm==='online'?' \u00b7 Online':pm==='both'?' \u00b7 Both':'';
+      var dlBtns=isLoggedIn()?'<div class="history-card-download"><button class="btn-history-card-dl" onclick="downloadBillByIdx('+i+')">Download CSV</button></div>':'';
+      html+='<div class="history-card">'+
+        '<div class="history-card-header">'+
+          '<span class="pending-card-meta">'+(bill.billOn?bill.billOn:'Bill')+' \u00b7 '+bill.time+pmStr+' \u2714</span>'+
+          '<span class="pending-card-amount">'+fmt(bill.net||bill.total||0)+'</span>'+
+        '</div>'+rows+disc+dlBtns+'</div>';
+    });
+    html+='</div>';
+  });
+  c.innerHTML=html;
 }
 
 var billingEditMode=false;
