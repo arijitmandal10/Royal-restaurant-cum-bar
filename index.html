@@ -27,6 +27,7 @@
     <span class="search-icon">&#x2315;</span>
   </div>
   <button id="cartIconBtn" onclick="openBilling()" class="hidden">&#x1F6D2;<span id="cartIconCount" class="hidden"></span></button>
+  <button id="tableIconBtn" onclick="openTablesPanel()" class="hidden">&#x25A6;</button>
 </div>
 
 <div class="tabs-wrap">
@@ -554,6 +555,40 @@
         <button id="pendingDetailPay" class="btn-pending-pay">&#x2714; Mark as Paid</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Tables Panel (staff only) -->
+<div id="tablesPanel" class="hidden">
+  <div class="tables-panel-inner">
+    <div class="tables-panel-header">
+      <span class="tables-panel-title">Tables</span>
+      <button class="btn-close-xl" onclick="closeTablesPanel()">&#x2715;</button>
+    </div>
+    <div class="tables-panel-actions">
+      <button class="btn-create-table" onclick="openCreateTablePopup()">+ Create Table</button>
+    </div>
+    <div id="tablesGrid" class="tables-grid"></div>
+  </div>
+</div>
+
+<!-- Create Table Popup -->
+<div id="createTableOverlay" class="overlay">
+  <div class="popup">
+    <button class="popup-close" onclick="closeCreateTablePopup()">&#x2715;</button>
+    <div class="popup-title">Create Table</div>
+    <input type="text" id="createTableInput" placeholder="Table name" onkeydown="if(event.key==='Enter')submitCreateTable()">
+    <button class="popup-btn" onclick="submitCreateTable()">Create</button>
+  </div>
+</div>
+
+<!-- Table Options Popup -->
+<div id="tableOptionsOverlay" class="overlay">
+  <div class="popup popup-wide">
+    <button class="popup-close" onclick="closeTableOptionsPopup()">&#x2715;</button>
+    <div id="tableOptionsTitle" class="popup-title"></div>
+    <div id="tableOptionsBody"></div>
+    <div id="tableOptionsActions" class="table-options-actions"></div>
   </div>
 </div>
 
