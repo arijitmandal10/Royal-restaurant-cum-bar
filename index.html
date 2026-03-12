@@ -26,7 +26,6 @@
     <button id="clearBtn" onclick="clearSearch()">&#x2715;</button>
     <span class="search-icon">&#x2315;</span>
   </div>
-  <button id="cartIconBtn" onclick="openBilling()" class="hidden">&#x1F6D2;<span id="cartIconCount" class="hidden"></span></button>
   <button id="tableIconBtn" onclick="openTablesPanel()" class="hidden">&#x25A6;</button>
 </div>
 
@@ -365,8 +364,9 @@
 
 <!-- Item Info Popup -->
 <div class="overlay" id="mrpOverlay">
-  <div class="popup popup-wide">
+  <div class="popup popup-wide mrp-popup">
     <button class="popup-close" onclick="closeMrpPopup()">&#x2715;</button>
+    <div class="mrp-popup-scroll">
     <div class="popup-title">Item Info</div>
     <div class="mrp-item-name" id="mrpItemName"></div>
     <div class="mrp-row mrp-row-hidden" id="mrpMrpRow">
@@ -453,6 +453,10 @@
         <button id="mrpQtrAdd" class="inline-add-btn inline-add-hidden" onclick="popupQtyChange('Qtr',1)">+</button>
       </div>
     </div>
+    </div>
+    <div id="mrpUpdateTableRow" class="mrp-update-footer mrp-row-hidden" style="margin-top:14px;padding-top:14px;border-top:2px solid var(--border);">
+      <button id="mrpUpdateTableBtn" class="popup-btn" onclick="updateTableFromPopup()" style="margin-top:0;">&#x1F4CB; Update Table</button>
+    </div>
   </div>
 </div>
 
@@ -466,12 +470,6 @@
         <button class="btn-close-xl" onclick="closeBilling()">&#x2715;</button>
       </div>
     </div>
-    <div class="billing-tabs">
-      <button id="billTab-current" class="bill-tab active" onclick="switchBillTab('current')">Current</button>
-      <button id="billTab-pending" class="bill-tab" onclick="switchBillTab('pending')">Pending <span id="pendingBadge" class="pending-badge hidden"></span></button>
-      <button id="billTab-history" class="bill-tab" onclick="switchBillTab('history')">History</button>
-    </div>
-
     <div id="billMenuSection" class="bill-menu-section hidden">
       <!-- search-wrap + searchResults moved here on Edit -->
     </div>
@@ -524,19 +522,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Pending Bills -->
-    <div id="billPane-pending" class="bill-pane hidden">
-      <div id="pendingBillsList"></div>
-    </div>
-
-    <!-- History -->
-    <div id="billPane-history" class="bill-pane hidden">
-      <div class="history-download-actions hidden" id="historyDownloadActions">
-        <button class="btn-history-download" onclick="downloadAllHistoryCsv()">Download Log Book (CSV)</button>
-      </div>
-      <div id="billHistoryList"></div>
-    </div>
   </div>
 </div>
 
@@ -562,13 +547,29 @@
 <div id="tablesPanel" class="hidden">
   <div class="tables-panel-inner">
     <div class="tables-panel-header">
-      <span class="tables-panel-title">Tables</span>
+      <span class="tables-panel-title">Tables &amp; Bills</span>
       <button class="btn-close-xl" onclick="closeTablesPanel()">&#x2715;</button>
     </div>
-    <div class="tables-panel-actions">
-      <button class="btn-create-table" onclick="openCreateTablePopup()">+ Create Table</button>
+    <div class="tables-panel-tabs">
+      <button id="tablesPanelTab-tables" class="tables-panel-tab active" onclick="switchTablesPanelTab('tables')">Tables</button>
+      <button id="tablesPanelTab-pending" class="tables-panel-tab" onclick="switchTablesPanelTab('pending')">Pending <span id="tablesPanelPendingBadge" class="pending-badge hidden"></span></button>
+      <button id="tablesPanelTab-history" class="tables-panel-tab" onclick="switchTablesPanelTab('history')">History</button>
     </div>
-    <div id="tablesGrid" class="tables-grid"></div>
+    <div id="tablesPaneTables" class="tables-pane">
+      <div class="tables-panel-actions">
+        <button class="btn-create-table" onclick="openCreateTablePopup()">+ Create Table</button>
+      </div>
+      <div id="tablesGrid" class="tables-grid"></div>
+    </div>
+    <div id="tablesPanePending" class="tables-pane hidden">
+      <div id="tablesPanelPendingList"></div>
+    </div>
+    <div id="tablesPaneHistory" class="tables-pane hidden">
+      <div class="history-download-actions" id="tablesPanelHistoryDownload">
+        <button class="btn-history-download" onclick="downloadAllHistoryCsv()">Download Log Book (CSV)</button>
+      </div>
+      <div id="tablesPanelHistoryList"></div>
+    </div>
   </div>
 </div>
 
