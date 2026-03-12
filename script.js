@@ -119,24 +119,21 @@ function initAuth(){
 }
 function showLoggedIn(){
   var loginBtn=document.getElementById('empLoginBtn'),status=document.getElementById('empStatus');
-  var dot=document.getElementById('empDot'),cartBar=document.getElementById('cartBar'),cartBtn=document.getElementById('cartIconBtn'),tableBtn=document.getElementById('tableIconBtn');
+  var dot=document.getElementById('empDot'),cartBar=document.getElementById('cartBar'),tableBtn=document.getElementById('tableIconBtn');
   if(loginBtn)loginBtn.classList.add('hidden');
   if(status){status.classList.remove('hidden');status.classList.add('visible');}
   if(dot)dot.classList.remove('hidden');
-  if(cartBar)cartBar.classList.remove('hidden');
-  if(cartBtn)cartBtn.classList.remove('hidden');
   if(tableBtn)tableBtn.classList.remove('hidden');
   updateCartBar();
 }
 function logout(){
   localStorage.removeItem(EMP_KEY);
   var loginBtn=document.getElementById('empLoginBtn'),status=document.getElementById('empStatus');
-  var dot=document.getElementById('empDot'),cartBar=document.getElementById('cartBar'),cartBtn=document.getElementById('cartIconBtn'),tableBtn=document.getElementById('tableIconBtn');
+  var dot=document.getElementById('empDot'),cartBar=document.getElementById('cartBar'),tableBtn=document.getElementById('tableIconBtn');
   if(loginBtn)loginBtn.classList.remove('hidden');
   if(status){status.classList.add('hidden');status.classList.remove('visible');}
   if(dot)dot.classList.add('hidden');
   if(cartBar)cartBar.classList.add('hidden');
-  if(cartBtn)cartBtn.classList.add('hidden');
   if(tableBtn)tableBtn.classList.add('hidden');
   updateCartBar();
   showToast('Logged out');
@@ -241,6 +238,9 @@ function showFoodPopup(name){
   document.getElementById('mrp90mlRow').classList.add('mrp-row-hidden');
   document.getElementById('mrpQtrRow').classList.add('mrp-row-hidden');
   showRow('mrpFull',!!price);showRow('mrp60ml',false);showRow('mrp30ml',false);showRow('mrpHalf',!!half);showRow('mrp90ml',false);showRow('mrpQtr',false);showRow('mrpMrp',false);
+  var updateRow=document.getElementById('mrpUpdateTableRow');
+  if(updateRow){updateRow.classList.toggle('mrp-row-hidden',!(_editingFromPending||_editingFromTable));var updateBtn=document.getElementById('mrpUpdateTableBtn');if(updateBtn)updateBtn.textContent=(_editingFromTable?'\u{1F4CB} Update Table':'\u{1F4CB} Update Bill');}
+  var popup=document.querySelector('#mrpOverlay .mrp-popup');if(popup){if(billingEditMode)popup.classList.remove('mrp-readonly');else popup.classList.add('mrp-readonly');}
   document.getElementById('mrpOverlay').classList.add('overlay-visible');
   refreshPopupQty();
 }
@@ -308,29 +308,58 @@ function showLiquorPopup(name,size,tabId){
       showRow('mrpFull',false);showRow('mrp60ml',false);showRow('mrp30ml',false);showRow('mrpHalf',false);showRow('mrp90ml',false);showRow('mrpQtr',false);showRow('mrpMrp',!!realMrp);
     }
   }
+  var updateRow=document.getElementById('mrpUpdateTableRow');
+  if(updateRow){updateRow.classList.toggle('mrp-row-hidden',!(_editingFromPending||_editingFromTable));var updateBtn=document.getElementById('mrpUpdateTableBtn');if(updateBtn)updateBtn.textContent=(_editingFromTable?'\u{1F4CB} Update Table':'\u{1F4CB} Update Bill');}
+  var popup=document.querySelector('#mrpOverlay .mrp-popup');if(popup){if(billingEditMode)popup.classList.remove('mrp-readonly');else popup.classList.add('mrp-readonly');}
   document.getElementById('mrpOverlay').classList.add('overlay-visible');
   refreshPopupQty();
 }
 
 function closeMrpPopup(){document.getElementById('mrpOverlay').classList.remove('overlay-visible');}
+function updateTableFromPopup(){
+  var items=getBill();if(!items.length){showToast('Bill is empty');closeMrpPopup();return;}
+  var gross=items.reduce(function(s,i){return s+(i.price*i.qty);},0);
+  var discEl=document.getElementById('discountInput');var disc=discEl?(parseInt(discEl.value)||0):0;
+  var net=Math.max(0,gross-disc);
+  var billOnEl=document.getElementById('billOnInput');var billOn=billOnEl?billOnEl.value.trim():'';
+  if(!billOn){createBill();closeMrpPopup();return;}
+  if(_editingBillId){
+    var pending=getPending();var bill=pending.find(function(b){return b.id===_editingBillId;});
+    if(bill){
+      bill.items=JSON.parse(JSON.stringify(items));bill.gross=gross;bill.discount=disc;bill.net=net;bill.time=new Date().toLocaleString('en-IN');
+      savePending(pending);
+      renderBillPanel();updateCartBar();showToast('Bill updated \u2713');
+    }
+  }else{
+    var cnt=parseInt(localStorage.getItem('royal_bill_counter')||'0',10)+1;
+    localStorage.setItem('royal_bill_counter',String(cnt));
+    var billOnFinal=billOn||'Bill #'+cnt;
+    if(billOnFinal){
+      var empty=getEmptyTables();
+      if(empty.indexOf(billOnFinal)>=0){empty=empty.filter(function(n){return n!==billOnFinal;});saveEmptyTables(empty);}
+    }
+    var newId=Date.now();
+    var pending=getPending();
+    pending.unshift({id:newId,time:new Date().toLocaleString('en-IN'),billOn:billOnFinal,items:JSON.parse(JSON.stringify(items)),gross:gross,discount:disc,net:net});
+    savePending(pending);
+    _editingBillId=newId;
+    renderBillPanel();updateCartBar();showToast('Bill saved \u2713');
+  }
+  closeMrpPopup();
+}
 
 // ── CLICK OUTSIDE TO CLOSE ──
+function isClickOutsidePopup(overlay,e){
+  if(!overlay||!overlay.classList.contains('overlay-visible'))return false;
+  var popup=overlay.querySelector('.popup');
+  return overlay.contains(e.target)&&(!popup||!popup.contains(e.target));
+}
 document.addEventListener('click',function(e){
-  // Close item popup
-  var overlay=document.getElementById('mrpOverlay');
-  if(overlay&&overlay.classList.contains('overlay-visible')&&e.target===overlay){closeMrpPopup();}
-  // Close login popup
-  var loginOv=document.getElementById('loginOverlay');
-  if(loginOv&&loginOv.classList.contains('overlay-visible')&&e.target===loginOv){closeLoginPopup();}
-  // Close payment method popup
-  var pmOv=document.getElementById('paymentMethodOverlay');
-  if(pmOv&&pmOv.classList.contains('overlay-visible')&&e.target===pmOv){closePaymentMethodPopup();}
-  // Close create table popup
-  var ctOv=document.getElementById('createTableOverlay');
-  if(ctOv&&ctOv.classList.contains('overlay-visible')&&e.target===ctOv){closeCreateTablePopup();}
-  // Close table options popup
-  var toOv=document.getElementById('tableOptionsOverlay');
-  if(toOv&&toOv.classList.contains('overlay-visible')&&e.target===toOv){closeTableOptionsPopup();}
+  if(isClickOutsidePopup(document.getElementById('mrpOverlay'),e)){closeMrpPopup();}
+  if(isClickOutsidePopup(document.getElementById('loginOverlay'),e)){closeLoginPopup();}
+  if(isClickOutsidePopup(document.getElementById('paymentMethodOverlay'),e)){closePaymentMethodPopup();}
+  if(isClickOutsidePopup(document.getElementById('createTableOverlay'),e)){closeCreateTablePopup();}
+  if(isClickOutsidePopup(document.getElementById('tableOptionsOverlay'),e)){closeTableOptionsPopup();}
 });
 
 // ── BILLING DATA ──
@@ -389,8 +418,6 @@ function updateCartBar(){
   var totalEl=document.getElementById('cartBarTotal');
   if(summary)summary.textContent=count>0?count+' item'+(count===1?'':'s')+' in bill':'Tap any item to add';
   if(totalEl)totalEl.textContent=fmt(total);
-  var badge=document.getElementById('cartIconCount');
-  if(badge){if(count>0){badge.classList.remove('hidden');badge.textContent=count;}else{badge.classList.add('hidden');}}
   var pb=document.getElementById('pendingBadge');
   if(pb){var pc=getPending().length;if(pc){pb.classList.remove('hidden');pb.textContent=pc;}else{pb.classList.add('hidden');}}
 }
@@ -456,6 +483,10 @@ function createBill(){
     if(empty.indexOf(billOn)>=0){empty=empty.filter(function(n){return n!==billOn;});saveEmptyTables(empty);}
   }
   var pending=getPending();
+  if(_editingBillId){
+    pending=pending.filter(function(b){return b.id!==_editingBillId;});
+    _editingBillId=null;
+  }
   pending.unshift({id:Date.now(),time:new Date().toLocaleString('en-IN'),billOn:billOn,items:JSON.parse(JSON.stringify(items)),gross:gross,discount:disc,net:net});
   savePending(pending);localStorage.removeItem(BILL_KEY);
   if(discEl)discEl.value='';if(billOnEl)billOnEl.value='';
@@ -463,7 +494,11 @@ function createBill(){
   document.getElementById('discountToggleBtn').textContent='+ Discount';
   _editingFromPending=false;_editingFromTable=false;
   var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} Create Bill';
-  renderBillPanel();switchBillTab('pending');showToast('Bill created \u2713');
+  renderBillPanel();showToast('Bill created \u2713');
+  closeBilling();
+  if(typeof openTablesPanel==='function')openTablesPanel();
+  if(typeof switchTablesPanelTab==='function')switchTablesPanelTab('pending');
+  if(typeof renderTablesPanelPending==='function')renderTablesPanelPending();
   if(typeof renderTablesGrid==='function')renderTablesGrid();
 }
 var _pendingPayId=null;
@@ -475,7 +510,7 @@ function confirmPaymentMethod(method){
   bill.paymentMethod=method;
   var hist=getHistory();hist.unshift(bill);localStorage.setItem(HIST_KEY,JSON.stringify(hist));
   savePending(pending.filter(function(b){return b.id!==id;}));
-  closePendingDetail();renderPendingBills();updateCartBar();showToast('Marked as paid \u2713');
+  closePendingDetail();if(typeof renderTablesPanelPending==='function')renderTablesPanelPending();updateCartBar();showToast('Marked as paid \u2713');
   if(typeof renderTablesGrid==='function')renderTablesGrid();
 }
 function markPaid(id){
@@ -483,18 +518,23 @@ function markPaid(id){
 }
 function editPendingBill(id){
   var pending=getPending();var bill=pending.find(function(b){return b.id===id;});if(!bill)return;
-  saveBill(bill.items);savePending(pending.filter(function(b){return b.id!==id;}));
+  saveBill(bill.items);
+  _editingBillId=id;
   var billOnEl=document.getElementById('billOnInput');if(billOnEl)billOnEl.value=bill.billOn||'';
   var discEl=document.getElementById('discountInput');var discRow=document.getElementById('discountRow');var discBtn=document.getElementById('discountToggleBtn');
   if(bill.discount&&bill.discount>0){if(discEl)discEl.value=bill.discount;if(discRow)discRow.classList.remove('hidden');if(discBtn)discBtn.textContent='\u2715 Discount';}
-  _editingFromPending=true;_editingFromTable=false;
-  var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} Update Bill';
-  closePendingDetail();renderBillPanel();switchBillTab('current');showSearchInBilling();showToast('Bill loaded for editing');
+  _editingFromPending=true;
+  if(!_editingFromTable)_editingFromTable=false;
+  var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} '+(_editingFromTable?'Update Table':'Update Bill');
+  closePendingDetail();
+  if(typeof closeTablesPanel==='function')closeTablesPanel();
+  openBilling();
+  renderBillPanel();switchBillTab('current');showSearchInBilling();showToast('Bill loaded for editing');
 }
 function deletePendingBill(id){
   if(!confirm('Delete this pending bill?'))return;
   savePending(getPending().filter(function(b){return b.id!==id;}));
-  closePendingDetail();renderPendingBills();updateCartBar();
+  closePendingDetail();if(typeof renderTablesPanelPending==='function')renderTablesPanelPending();updateCartBar();
   if(typeof renderTablesGrid==='function')renderTablesGrid();
 }
 
@@ -549,10 +589,67 @@ function openTablesPanel(){
   if(!isLoggedIn())return;
   var p=document.getElementById('tablesPanel');if(!p)return;
   p.classList.remove('hidden');
-  renderTablesGrid();
+  switchTablesPanelTab('tables');
 }
 function closeTablesPanel(){
   var p=document.getElementById('tablesPanel');if(p)p.classList.add('hidden');
+}
+function switchTablesPanelTab(tab){
+  ['tables','pending','history'].forEach(function(t){
+    var pane=document.getElementById('tablesPane'+t.charAt(0).toUpperCase()+t.slice(1));if(pane)pane.classList.toggle('hidden',t!==tab);
+    var btn=document.getElementById('tablesPanelTab-'+t);
+    if(btn)btn.classList.toggle('active',t===tab);
+  });
+  if(tab==='tables')renderTablesGrid();
+  if(tab==='pending')renderTablesPanelPending();
+  if(tab==='history')renderTablesPanelHistory();
+  var pb=document.getElementById('tablesPanelPendingBadge');if(pb){var pc=getPending().length;if(pc){pb.classList.remove('hidden');pb.textContent=pc;}else{pb.classList.add('hidden');}}
+}
+function renderTablesPanelPending(){
+  var pending=getPending();var c=document.getElementById('tablesPanelPendingList');if(!c)return;
+  if(!pending.length){c.innerHTML='<div class="empty-msg">No pending bills</div>';return;}
+  c.innerHTML=pending.map(function(bill,i){
+    var preview=bill.items.slice(0,2).map(function(it){return escapeHtml(it.name);}).join(', ')+(bill.items.length>2?' +'+(bill.items.length-2)+' more':'');
+    return '<div class="pending-card" onclick="openPendingDetail('+bill.id+')">'+
+      '<div class="pending-card-header">'+
+        '<span class="pending-card-meta">#'+(pending.length-i)+(bill.billOn?' \u00b7 '+bill.billOn:'')+' \u00b7 '+bill.time+'</span>'+
+        '<span class="pending-card-amount">'+fmt(bill.net)+'</span>'+
+      '</div>'+
+      '<div class="pending-card-preview">'+preview+'</div>'+
+    '</div>';
+  }).join('');
+}
+function renderTablesPanelHistory(){
+  var hist=getHistory();var c=document.getElementById('tablesPanelHistoryList');var da=document.getElementById('tablesPanelHistoryDownload');
+  if(!c)return;
+  if(da){da.classList.toggle('hidden',!isLoggedIn()||!hist.length);}
+  if(!hist.length){c.innerHTML='<div class="empty-msg">No paid bills yet</div>';return;}
+  var byDate={};
+  hist.forEach(function(bill){var k=getDateKey(bill);if(!byDate[k])byDate[k]=[];byDate[k].push(bill);});
+  var dates=Object.keys(byDate).sort().reverse();
+  var html='';
+  dates.forEach(function(dateKey){
+    var bills=byDate[dateKey];
+    var dayTotal=bills.reduce(function(s,b){return s+(b.net||b.total||0);},0);
+    var parts=dateKey.split('-');
+    var dateLabel=parts.length>=3?parts[2]+'/'+parts[1]+'/'+parts[0]:dateKey;
+    html+='<div class="history-date-section"><div class="history-date-header">'+dateLabel+' \u00b7 Day Total: '+fmt(dayTotal)+'</div>';
+    bills.forEach(function(bill){
+      var i=hist.indexOf(bill);
+      var rows=bill.items.map(function(it){return '<div class="history-item-row">'+
+        '<span>'+escapeHtml(it.name)+' ('+escapeHtml(it.size)+') \xd7'+it.qty+'</span><span class="history-item-amount">'+fmt(it.price*it.qty)+'</span></div>';}).join('');
+      var disc=bill.discount?'<div class="history-discount-row"><span>Discount</span><span>\u2212 '+fmt(bill.discount)+'</span></div>':'';
+      var pm=bill.paymentMethod;var pmStr=pm==='cash'?' \u00b7 Cash':pm==='online'?' \u00b7 Online':pm==='both'?' \u00b7 Both':'';
+      var dlBtns=isLoggedIn()?'<div class="history-card-download"><button class="btn-history-card-dl" onclick="downloadBillByIdx('+i+')">Download CSV</button></div>':'';
+      html+='<div class="history-card">'+
+        '<div class="history-card-header">'+
+          '<span class="pending-card-meta">'+(bill.billOn?bill.billOn:'Bill')+' \u00b7 '+bill.time+pmStr+' \u2714</span>'+
+          '<span class="pending-card-amount">'+fmt(bill.net||bill.total||0)+'</span>'+
+        '</div>'+rows+disc+dlBtns+'</div>';
+    });
+    html+='</div>';
+  });
+  c.innerHTML=html;
 }
 function renderTablesGrid(){
   var grid=document.getElementById('tablesGrid');if(!grid)return;
@@ -563,9 +660,17 @@ function renderTablesGrid(){
   var isEmpty=function(n){return empty.indexOf(n)>=0;};
   grid.innerHTML=tables.map(function(name){
     var isEmp=isEmpty(name);
+    var bill=pending.find(function(b){return (b.billOn||'').trim()===name;});
     var attrVal=(name||'').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     var delBtn=isEmp?'<button class="table-card-del" onclick="event.stopPropagation();deleteEmptyTable(this.parentElement.dataset.tableName)">\u2715</button>':'';
-    return '<div class="table-card" data-table-name="'+attrVal+'" onclick="openTableOptionsPopup(this.dataset.tableName)">'+delBtn+'<span class="table-card-name">'+escapeHtml(name)+'</span></div>';
+    var itemsHtml='',totalHtml='';
+    if(bill&&bill.items&&bill.items.length){
+      itemsHtml='<div class="table-card-items">'+bill.items.slice(0,4).map(function(it){return it.qty+'\xd7 '+escapeHtml(it.name);}).join(' \u00b7 ')+(bill.items.length>4?' +'+(bill.items.length-4):'')+'</div>';
+      totalHtml='<div class="table-card-total">'+fmt(bill.net||bill.gross||0)+'</div>';
+    } else if(isEmp){
+      itemsHtml='<div class="table-card-items table-card-empty">Empty</div>';
+    }
+    return '<div class="table-card" data-table-name="'+attrVal+'" onclick="openTableOptionsPopup(this.dataset.tableName)">'+delBtn+'<div class="table-card-content"><span class="table-card-name">'+escapeHtml(name)+'</span>'+itemsHtml+totalHtml+'</div></div>';
   }).join('');
 }
 function openCreateTablePopup(){
@@ -646,7 +751,8 @@ function openTableForEdit(tableName){
     var billOnEl=document.getElementById('billOnInput');if(billOnEl)billOnEl.value=tableName;
     var discEl=document.getElementById('discountInput');var discRow=document.getElementById('discountRow');var discBtn=document.getElementById('discountToggleBtn');
     if(discEl)discEl.value='';if(discRow)discRow.classList.add('hidden');if(discBtn)discBtn.textContent='+ Discount';
-    _editingFromPending=false;_editingFromTable=false;
+    _editingFromPending=false;_editingFromTable=true;
+    var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} Update Table';
     switchBillTab('current');
     renderBillPanel();
     showSearchInBilling();
@@ -759,43 +865,55 @@ function renderHistoryBills(){
   c.innerHTML=html;
 }
 
-var billingEditMode=false,_editingFromPending=false,_editingFromTable=false;
+var billingEditMode=false,_editingFromPending=false,_editingFromTable=false,_editingBillId=null;
 function showSearchInBilling(){
-  var sect=document.getElementById('billMenuSection');var sw=document.querySelector('.search-wrap');var sr=document.getElementById('searchResults');
-  if(!sect||!sw||!sr)return;
-  var ct=document.querySelector('.content');
-  if(ct&&sr.parentNode===ct)ct.removeChild(sr);
-  sect.appendChild(sw);sect.appendChild(sr);
+  var sect=document.getElementById('billMenuSection');var sw=document.querySelector('.search-wrap');var tw=document.querySelector('.tabs-wrap');var ct=document.querySelector('.content');
+  if(!sect||!sw||!tw||!ct)return;
+  sect.appendChild(sw);sect.appendChild(tw);sect.appendChild(ct);
   sect.classList.remove('hidden');
   billingEditMode=true;
+  var cartBar=document.getElementById('cartBar');if(cartBar)cartBar.classList.remove('hidden');
+  updateCartBar();
 }
 function hideSearchInBilling(){
-  var sect=document.getElementById('billMenuSection');var sw=document.querySelector('.search-wrap');var sr=document.getElementById('searchResults');
-  if(!sect||!sw||!sr)return;
+  var sect=document.getElementById('billMenuSection');var sw=document.querySelector('.search-wrap');var tw=document.querySelector('.tabs-wrap');var ct=document.querySelector('.content');
+  if(!sect||!sw||!tw||!ct)return;
   sect.classList.add('hidden');
-  var header=document.querySelector('header');var tw=document.querySelector('.tabs-wrap');var ct=document.querySelector('.content');
-  if(header){header.parentNode.insertBefore(sw,header.nextSibling);}
-  if(ct){ct.insertBefore(sr,ct.firstChild);}
+  var header=document.querySelector('header');
+  if(header){
+    header.parentNode.insertBefore(sw,header.nextSibling);
+    header.parentNode.insertBefore(tw,sw.nextSibling);
+    header.parentNode.insertBefore(ct,tw.nextSibling);
+  }
   billingEditMode=false;
+  var cartBar=document.getElementById('cartBar');if(cartBar)cartBar.classList.add('hidden');
 }
 function switchBillTab(tab){
   if(billingEditMode&&tab!=='current')hideSearchInBilling();
-  ['current','pending','history'].forEach(function(t){
-    var pane=document.getElementById('billPane-'+t);if(pane)pane.classList.toggle('hidden',t!==tab);
-    var btn=document.getElementById('billTab-'+t);
-    if(btn)btn.classList.toggle('active',t===tab);
-  });
-  if(tab==='pending')renderPendingBills();
-  if(tab==='history')renderHistoryBills();
+  var pane=document.getElementById('billPane-current');if(pane)pane.classList.remove('hidden');
 }
 function clearAllData(){
   if(!confirm('Clear all billing data?'))return;
   localStorage.removeItem(BILL_KEY);localStorage.removeItem(HIST_KEY);localStorage.removeItem(PEND_KEY);localStorage.removeItem(TABLES_KEY);localStorage.removeItem('royal_bill_counter');
   renderBillPanel();updateCartBar();showToast('All data cleared');
   if(typeof renderTablesGrid==='function')renderTablesGrid();
+  if(typeof renderTablesPanelPending==='function')renderTablesPanelPending();
+  if(typeof renderTablesPanelHistory==='function')renderTablesPanelHistory();
 }
 function openBilling(){var p=document.getElementById('billingPanel');if(!p)return;p.classList.remove('hidden');switchBillTab('current');renderBillPanel();}
-function closeBilling(){var p=document.getElementById('billingPanel');if(p){hideSearchInBilling();p.classList.add('hidden');}_editingFromPending=false;_editingFromTable=false;var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} Create Bill';}
+function closeBilling(){
+  var p=document.getElementById('billingPanel');
+  if(p){hideSearchInBilling();p.classList.add('hidden');}
+  if(_editingBillId){
+    localStorage.removeItem(BILL_KEY);
+    var billOnEl=document.getElementById('billOnInput');if(billOnEl)billOnEl.value='';
+    var discEl=document.getElementById('discountInput');var discRow=document.getElementById('discountRow');var discBtn=document.getElementById('discountToggleBtn');
+    if(discEl)discEl.value='';if(discRow)discRow.classList.add('hidden');if(discBtn)discBtn.textContent='+ Discount';
+    _editingBillId=null;
+  }
+  _editingFromPending=false;_editingFromTable=false;
+  var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} Create Bill';
+}
 
 function showToast(msg){
   var t=document.getElementById('toastMsg');
