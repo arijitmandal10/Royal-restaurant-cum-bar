@@ -239,7 +239,7 @@ function showFoodPopup(name){
   document.getElementById('mrpQtrRow').classList.add('mrp-row-hidden');
   showRow('mrpFull',!!price);showRow('mrp60ml',false);showRow('mrp30ml',false);showRow('mrpHalf',!!half);showRow('mrp90ml',false);showRow('mrpQtr',false);showRow('mrpMrp',false);
   var updateRow=document.getElementById('mrpUpdateTableRow');
-  if(updateRow){updateRow.classList.toggle('mrp-row-hidden',!(_editingFromPending||_editingFromTable));var updateBtn=document.getElementById('mrpUpdateTableBtn');if(updateBtn)updateBtn.textContent=(_editingFromTable?'\u{1F4CB} Update Table':'\u{1F4CB} Update Bill');}
+  if(updateRow){updateRow.classList.toggle('mrp-row-hidden',!(_editingFromPending||_editingFromTable));var updateBtn=document.getElementById('mrpUpdateTableBtn');if(updateBtn)updateBtn.textContent='\u{1F4CB} Update Bill';}
   var popup=document.querySelector('#mrpOverlay .mrp-popup');if(popup){if(billingEditMode)popup.classList.remove('mrp-readonly');else popup.classList.add('mrp-readonly');}
   document.getElementById('mrpOverlay').classList.add('overlay-visible');
   refreshPopupQty();
@@ -309,7 +309,7 @@ function showLiquorPopup(name,size,tabId){
     }
   }
   var updateRow=document.getElementById('mrpUpdateTableRow');
-  if(updateRow){updateRow.classList.toggle('mrp-row-hidden',!(_editingFromPending||_editingFromTable));var updateBtn=document.getElementById('mrpUpdateTableBtn');if(updateBtn)updateBtn.textContent=(_editingFromTable?'\u{1F4CB} Update Table':'\u{1F4CB} Update Bill');}
+  if(updateRow){updateRow.classList.toggle('mrp-row-hidden',!(_editingFromPending||_editingFromTable));var updateBtn=document.getElementById('mrpUpdateTableBtn');if(updateBtn)updateBtn.textContent='\u{1F4CB} Update Bill';}
   var popup=document.querySelector('#mrpOverlay .mrp-popup');if(popup){if(billingEditMode)popup.classList.remove('mrp-readonly');else popup.classList.add('mrp-readonly');}
   document.getElementById('mrpOverlay').classList.add('overlay-visible');
   refreshPopupQty();
@@ -745,14 +745,14 @@ function openTableForEdit(tableName){
   if(bill){
     _editingFromPending=true;_editingFromTable=true;
     editPendingBill(bill.id);
-    var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} Update Table';
+    var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} Update Bill';
   } else {
     saveBill([]);
     var billOnEl=document.getElementById('billOnInput');if(billOnEl)billOnEl.value=tableName;
     var discEl=document.getElementById('discountInput');var discRow=document.getElementById('discountRow');var discBtn=document.getElementById('discountToggleBtn');
     if(discEl)discEl.value='';if(discRow)discRow.classList.add('hidden');if(discBtn)discBtn.textContent='+ Discount';
     _editingFromPending=false;_editingFromTable=true;
-    var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} Update Table';
+    var btn=document.getElementById('createBillBtn');if(btn)btn.textContent='\u{1F4CB} Update Bill';
     switchBillTab('current');
     renderBillPanel();
     showSearchInBilling();
