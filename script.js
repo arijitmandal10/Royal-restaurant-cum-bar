@@ -239,7 +239,7 @@ function showFoodPopup(name){
   document.getElementById('mrpQtrRow').classList.add('mrp-row-hidden');
   showRow('mrpFull',!!price);showRow('mrp60ml',false);showRow('mrp30ml',false);showRow('mrpHalf',!!half);showRow('mrp90ml',false);showRow('mrpQtr',false);showRow('mrpMrp',false);
   var updateRow=document.getElementById('mrpUpdateTableRow');
-  if(updateRow){updateRow.classList.toggle('mrp-row-hidden',!(_editingFromPending||_editingFromTable));var updateBtn=document.getElementById('mrpUpdateTableBtn');if(updateBtn)updateBtn.textContent='\u{1F4CB} Update Bill';}
+  if(updateRow){updateRow.classList.toggle('mrp-row-hidden',!(_editingFromPending||_editingFromTable));var updateBtn=document.getElementById('mrpUpdateTableBtn');if(updateBtn)updateBtn.textContent='\u{1F4CB} Update Table';}
   var popup=document.querySelector('#mrpOverlay .mrp-popup');if(popup){if(billingEditMode)popup.classList.remove('mrp-readonly');else popup.classList.add('mrp-readonly');}
   document.getElementById('mrpOverlay').classList.add('overlay-visible');
   refreshPopupQty();
@@ -309,7 +309,7 @@ function showLiquorPopup(name,size,tabId){
     }
   }
   var updateRow=document.getElementById('mrpUpdateTableRow');
-  if(updateRow){updateRow.classList.toggle('mrp-row-hidden',!(_editingFromPending||_editingFromTable));var updateBtn=document.getElementById('mrpUpdateTableBtn');if(updateBtn)updateBtn.textContent='\u{1F4CB} Update Bill';}
+  if(updateRow){updateRow.classList.toggle('mrp-row-hidden',!(_editingFromPending||_editingFromTable));var updateBtn=document.getElementById('mrpUpdateTableBtn');if(updateBtn)updateBtn.textContent='\u{1F4CB} Update Table';}
   var popup=document.querySelector('#mrpOverlay .mrp-popup');if(popup){if(billingEditMode)popup.classList.remove('mrp-readonly');else popup.classList.add('mrp-readonly');}
   document.getElementById('mrpOverlay').classList.add('overlay-visible');
   refreshPopupQty();
