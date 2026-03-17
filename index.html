@@ -362,6 +362,22 @@
   </div>
 </div>
 
+<!-- Pay Later Popup -->
+<div class="overlay" id="payLaterOverlay">
+  <div class="popup">
+    <button class="popup-close" onclick="closePayLaterPopup()">&#x2715;</button>
+    <div class="popup-title">Pay Later</div>
+    <div class="pay-later-bill-total" id="payLaterTotalDisplay"></div>
+    <div class="pay-later-field-label">Amount paid now (&#8377;):</div>
+    <input type="number" id="payLaterAmountInput" placeholder="0" min="0" value="0" oninput="updatePayLaterPending()">
+    <div class="pay-later-pending-row">
+      <span class="pay-later-pending-label">Pending:</span>
+      <span class="pay-later-pending-value" id="payLaterPendingDisplay"></span>
+    </div>
+    <button class="popup-btn" onclick="confirmPayLater()">&#x2713; Confirm Pay Later</button>
+  </div>
+</div>
+
 <!-- Item Info Popup -->
 <div class="overlay" id="mrpOverlay">
   <div class="popup popup-wide mrp-popup">
@@ -538,6 +554,7 @@
         <button id="pendingDetailEdit" class="btn-pending-edit">&#x270E; Edit</button>
         <button id="pendingDetailDelete" class="btn-pending-delete">&#x1F5D1;</button>
         <button id="pendingDetailPay" class="btn-pending-pay">&#x2714; Mark as Paid</button>
+        <button id="pendingDetailPayLater" class="btn-pending-pay-later">&#x23F3; Pay Later</button>
       </div>
     </div>
   </div>
