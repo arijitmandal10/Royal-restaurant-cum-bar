@@ -358,6 +358,7 @@ document.addEventListener('click',function(e){
   if(isClickOutsidePopup(document.getElementById('mrpOverlay'),e)){closeMrpPopup();}
   if(isClickOutsidePopup(document.getElementById('loginOverlay'),e)){closeLoginPopup();}
   if(isClickOutsidePopup(document.getElementById('paymentMethodOverlay'),e)){closePaymentMethodPopup();}
+  if(isClickOutsidePopup(document.getElementById('payLaterOverlay'),e)){closePayLaterPopup();}
   if(isClickOutsidePopup(document.getElementById('createTableOverlay'),e)){closeCreateTablePopup();}
   if(isClickOutsidePopup(document.getElementById('tableOptionsOverlay'),e)){closeTableOptionsPopup();}
 });
@@ -516,6 +517,38 @@ function confirmPaymentMethod(method){
 function markPaid(id){
   openPaymentMethodPopup(id);
 }
+var _payLaterBillId=null,_payLaterBillNet=0;
+function payLater(id){
+  var pending=getPending();var bill=pending.find(function(b){return b.id===id;});if(!bill)return;
+  _payLaterBillId=id;_payLaterBillNet=bill.net;
+  var totalEl=document.getElementById('payLaterTotalDisplay');if(totalEl)totalEl.textContent='Bill Total: '+fmt(bill.net);
+  var inp=document.getElementById('payLaterAmountInput');if(inp)inp.value='0';
+  updatePayLaterPending();
+  document.getElementById('payLaterOverlay').classList.add('overlay-visible');
+}
+function closePayLaterPopup(){
+  _payLaterBillId=null;
+  document.getElementById('payLaterOverlay').classList.remove('overlay-visible');
+}
+function updatePayLaterPending(){
+  var inp=document.getElementById('payLaterAmountInput');
+  var paid=inp?Math.max(0,parseInt(inp.value)||0):0;
+  var el=document.getElementById('payLaterPendingDisplay');
+  if(el)el.textContent=fmt(Math.max(0,_payLaterBillNet-paid));
+}
+function confirmPayLater(){
+  var id=_payLaterBillId;if(!id)return;
+  var inp=document.getElementById('payLaterAmountInput');
+  var paid=inp?Math.max(0,parseInt(inp.value)||0):0;
+  var pending=getPending();var bill=pending.find(function(b){return b.id===id;});if(!bill)return;
+  bill.paymentType='payLater';bill.amountPaid=paid;bill.amountPending=Math.max(0,bill.net-paid);
+  var hist=getHistory();hist.unshift(bill);localStorage.setItem(HIST_KEY,JSON.stringify(hist));
+  savePending(pending.filter(function(b){return b.id!==id;}));
+  closePayLaterPopup();closePendingDetail();
+  if(typeof renderTablesPanelPending==='function')renderTablesPanelPending();
+  updateCartBar();showToast('Saved as Pay Later \u2713');
+  if(typeof renderTablesGrid==='function')renderTablesGrid();
+}
 function editPendingBill(id){
   var pending=getPending();var bill=pending.find(function(b){return b.id===id;});if(!bill)return;
   saveBill(bill.items);
@@ -562,6 +595,7 @@ function openPendingDetail(id){
   document.getElementById('pendingDetailEdit').onclick=function(){editPendingBill(id);};
   document.getElementById('pendingDetailDelete').onclick=function(){deletePendingBill(id);};
   document.getElementById('pendingDetailPay').onclick=function(){markPaid(id);};
+  document.getElementById('pendingDetailPayLater').onclick=function(){payLater(id);};
   panel.classList.remove('hidden');
 }
 function closePendingDetail(){
@@ -633,19 +667,23 @@ function renderTablesPanelHistory(){
     var dayTotal=bills.reduce(function(s,b){return s+(b.net||b.total||0);},0);
     var parts=dateKey.split('-');
     var dateLabel=parts.length>=3?parts[2]+'/'+parts[1]+'/'+parts[0]:dateKey;
-    html+='<div class="history-date-section"><div class="history-date-header">'+dateLabel+' \u00b7 Day Total: '+fmt(dayTotal)+'</div>';
+    var delDayBtn=isLoggedIn()?'<button class="btn-delete-day" onclick="event.stopPropagation();deleteHistoryByDate(\''+dateKey+'\')">Del</button>':'';
+    html+='<div class="history-date-section"><div class="history-date-header"><span>'+dateLabel+' \u00b7 Day Total: '+fmt(dayTotal)+'</span>'+delDayBtn+'</div>';
     bills.forEach(function(bill){
       var i=hist.indexOf(bill);
       var rows=bill.items.map(function(it){return '<div class="history-item-row">'+
         '<span>'+escapeHtml(it.name)+' ('+escapeHtml(it.size)+') \xd7'+it.qty+'</span><span class="history-item-amount">'+fmt(it.price*it.qty)+'</span></div>';}).join('');
       var disc=bill.discount?'<div class="history-discount-row"><span>Discount</span><span>\u2212 '+fmt(bill.discount)+'</span></div>':'';
-      var pm=bill.paymentMethod;var pmStr=pm==='cash'?' \u00b7 Cash':pm==='online'?' \u00b7 Online':pm==='both'?' \u00b7 Both':'';
+      var isPayLater=bill.paymentType==='payLater';
+      var pm=bill.paymentMethod;var pmStr=isPayLater?' \u00b7 Pay Later \u23F3':(pm==='cash'?' \u00b7 Cash':pm==='online'?' \u00b7 Online':pm==='both'?' \u00b7 Both':'');
+      var statusIcon=isPayLater?'\u23F3':'\u2714';
+      var payLaterInfo=isPayLater?'<div class="history-pay-later-row"><span>Paid: '+fmt(bill.amountPaid||0)+'</span><span class="history-pay-later-pending">Pending: '+fmt(bill.amountPending||0)+'</span></div>':'';
       var dlBtns=isLoggedIn()?'<div class="history-card-download"><button class="btn-history-card-dl" onclick="downloadBillByIdx('+i+')">Download CSV</button></div>':'';
-      html+='<div class="history-card">'+
+      html+='<div class="history-card'+(isPayLater?' history-card-pay-later':'')+'">'+
         '<div class="history-card-header">'+
-          '<span class="pending-card-meta">'+(bill.billOn?bill.billOn:'Bill')+' \u00b7 '+bill.time+pmStr+' \u2714</span>'+
+          '<span class="pending-card-meta">'+(bill.billOn?bill.billOn:'Bill')+' \u00b7 '+bill.time+pmStr+' '+statusIcon+'</span>'+
           '<span class="pending-card-amount">'+fmt(bill.net||bill.total||0)+'</span>'+
-        '</div>'+rows+disc+dlBtns+'</div>';
+        '</div>'+rows+disc+payLaterInfo+dlBtns+'</div>';
     });
     html+='</div>';
   });
@@ -722,7 +760,8 @@ function openTableOptionsPopup(tableName){
     bodyEl.classList.add('hidden');
   }
   actionsEl.innerHTML='<button class="popup-btn table-options-btn" onclick="closeTableOptionsPopup();openTableForEdit(_tableOptionsTableName)">\u270E Edit items</button>'+
-    (bill?'<button class="popup-btn table-options-btn btn-pending-pay" onclick="closeTableOptionsPopup();closeTablesPanel();markPaid(_tableOptionsBillId)">\u2714 Mark as paid</button>':'');
+    (bill?'<button class="popup-btn table-options-btn btn-pending-pay" onclick="closeTableOptionsPopup();closeTablesPanel();markPaid(_tableOptionsBillId)">\u2714 Mark as paid</button>':'')+
+    (bill?'<button class="popup-btn table-options-btn btn-pending-pay-later" onclick="closeTableOptionsPopup();closeTablesPanel();payLater(_tableOptionsBillId)">\u23F3 Pay Later</button>':'');
   var ov=document.getElementById('tableOptionsOverlay');
   if(ov)ov.classList.add('overlay-visible');
 }
@@ -760,9 +799,20 @@ function openTableForEdit(tableName){
 }
 
 function getDateKey(bill){
-  var d=new Date(bill.time);
-  if(isNaN(d.getTime()))return (bill.time||'').split(',')[0]||'';
-  return d.getFullYear()+'-'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1)+'-'+(d.getDate()<10?'0':'')+d.getDate();
+  var raw=bill.time||'';
+  var d=new Date(raw);
+  if(!isNaN(d.getTime()))return d.getFullYear()+'-'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1)+'-'+(d.getDate()<10?'0':'')+d.getDate();
+  var m=raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(m){var dy=parseInt(m[1],10),mo=parseInt(m[2],10),yr=parseInt(m[3],10);return yr+'-'+(mo<10?'0':'')+mo+'-'+(dy<10?'0':'')+dy;}
+  return raw.split(',')[0]||'';
+}
+function deleteHistoryByDate(dateKey){
+  if(!confirm('Delete all history for this date?'))return;
+  var hist=getHistory().filter(function(b){return getDateKey(b)!==dateKey;});
+  localStorage.setItem(HIST_KEY,JSON.stringify(hist));
+  renderTablesPanelHistory();
+  if(typeof renderHistoryBills==='function')renderHistoryBills();
+  showToast('Day history deleted');
 }
 function formatBillDateTime(bill){
   var raw=bill.time||'';
@@ -804,7 +854,7 @@ function formatBillsAsCsv(bills){
   }
   bills.forEach(function(bill){
     var net=bill.net||bill.total||bill.items.reduce(function(s,it){return s+it.price*it.qty;},0)-(bill.discount||0);
-    var pm=bill.paymentMethod==='cash'?'Cash':bill.paymentMethod==='online'?'Online':bill.paymentMethod==='both'?'Both':'';
+    var pm=bill.paymentType==='payLater'?'Pay Later (Paid:'+( bill.amountPaid||0)+', Pending:'+(bill.amountPending||0)+')':bill.paymentMethod==='cash'?'Cash':bill.paymentMethod==='online'?'Online':bill.paymentMethod==='both'?'Both':'';
     var dt=formatBillDateTime(bill);
     var datePart=dt.datePart,timePart=dt.timePart;
     if(bill.items.length){
@@ -839,26 +889,29 @@ function renderHistoryBills(){
   var byDate={};
   hist.forEach(function(bill){var k=getDateKey(bill);if(!byDate[k])byDate[k]=[];byDate[k].push(bill);});
   var dates=Object.keys(byDate).sort().reverse();
-  var globalIdx=0;
   var html='';
   dates.forEach(function(dateKey){
     var bills=byDate[dateKey];
     var dayTotal=bills.reduce(function(s,b){return s+(b.net||b.total||0);},0);
     var parts=dateKey.split('-');
     var dateLabel=parts.length>=3?parts[2]+'/'+parts[1]+'/'+parts[0]:dateKey;
-    html+='<div class="history-date-section"><div class="history-date-header">'+dateLabel+' \u00b7 Day Total: '+fmt(dayTotal)+'</div>';
+    var delDayBtn=isLoggedIn()?'<button class="btn-delete-day" onclick="event.stopPropagation();deleteHistoryByDate(\''+dateKey+'\')">Del</button>':'';
+    html+='<div class="history-date-section"><div class="history-date-header"><span>'+dateLabel+' \u00b7 Day Total: '+fmt(dayTotal)+'</span>'+delDayBtn+'</div>';
     bills.forEach(function(bill){
       var i=hist.indexOf(bill);
       var rows=bill.items.map(function(it){return '<div class="history-item-row">'+
         '<span>'+escapeHtml(it.name)+' ('+escapeHtml(it.size)+') \xd7'+it.qty+'</span><span class="history-item-amount">'+fmt(it.price*it.qty)+'</span></div>';}).join('');
       var disc=bill.discount?'<div class="history-discount-row"><span>Discount</span><span>\u2212 '+fmt(bill.discount)+'</span></div>':'';
-      var pm=bill.paymentMethod;var pmStr=pm==='cash'?' \u00b7 Cash':pm==='online'?' \u00b7 Online':pm==='both'?' \u00b7 Both':'';
+      var isPayLater=bill.paymentType==='payLater';
+      var pm=bill.paymentMethod;var pmStr=isPayLater?' \u00b7 Pay Later \u23F3':(pm==='cash'?' \u00b7 Cash':pm==='online'?' \u00b7 Online':pm==='both'?' \u00b7 Both':'');
+      var statusIcon=isPayLater?'\u23F3':'\u2714';
+      var payLaterInfo=isPayLater?'<div class="history-pay-later-row"><span>Paid: '+fmt(bill.amountPaid||0)+'</span><span class="history-pay-later-pending">Pending: '+fmt(bill.amountPending||0)+'</span></div>':'';
       var dlBtns=isLoggedIn()?'<div class="history-card-download"><button class="btn-history-card-dl" onclick="downloadBillByIdx('+i+')">Download CSV</button></div>':'';
-      html+='<div class="history-card">'+
+      html+='<div class="history-card'+(isPayLater?' history-card-pay-later':'')+'">'+
         '<div class="history-card-header">'+
-          '<span class="pending-card-meta">'+(bill.billOn?bill.billOn:'Bill')+' \u00b7 '+bill.time+pmStr+' \u2714</span>'+
+          '<span class="pending-card-meta">'+(bill.billOn?bill.billOn:'Bill')+' \u00b7 '+bill.time+pmStr+' '+statusIcon+'</span>'+
           '<span class="pending-card-amount">'+fmt(bill.net||bill.total||0)+'</span>'+
-        '</div>'+rows+disc+dlBtns+'</div>';
+        '</div>'+rows+disc+payLaterInfo+dlBtns+'</div>';
     });
     html+='</div>';
   });
