@@ -311,7 +311,9 @@ input[type=password] { width:100%;padding:10px 14px;border:1.5px solid var(--bor
 .pending-card-preview { padding:10px 14px;font-size:15px;color:var(--text-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
 .history-download-actions { display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap; }
 .history-date-section { margin-bottom:20px; }
-.history-date-header { font-size:14px;font-weight:700;color:var(--navy);margin-bottom:10px;padding:8px 12px;background:var(--gold-pale2);border-radius:4px;border-left:4px solid var(--gold); }
+.history-date-header { font-size:14px;font-weight:700;color:var(--navy);margin-bottom:10px;padding:8px 12px;background:var(--gold-pale2);border-radius:4px;border-left:4px solid var(--gold);display:flex;justify-content:space-between;align-items:center; }
+.btn-delete-day { background:none;border:1px solid rgba(200,60,60,0.35);color:rgba(200,60,60,0.8);font-size:13px;padding:3px 9px;border-radius:3px;cursor:pointer;flex-shrink:0;font-weight:700;letter-spacing:0.5px; }
+.btn-delete-day:hover { background:rgba(200,60,60,0.12);color:#e74c3c; }
 .history-download-actions.hidden { display:none !important; }
 .btn-history-download { padding:10px 16px;background:var(--navy);color:var(--gold-light);border:none;border-radius:3px;font-size:13px;font-weight:700;cursor:pointer; }
 .btn-history-download:hover { background:var(--navy-light); }
@@ -336,3 +338,23 @@ input[type=password] { width:100%;padding:10px 14px;border:1.5px solid var(--bor
 .pending-detail-total { border-top:2px solid var(--gold);background:var(--gold-pale2);padding:12px 14px; }
 .toast-msg { position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--navy);color:var(--gold-light);padding:10px 20px;border-radius:3px;font-size:13px;z-index:9999;border:1px solid var(--gold);letter-spacing:0.5px;white-space:nowrap;pointer-events:none;opacity:1;transition:opacity 0.3s; }
 .toast-msg.toast-fade { opacity:0; }
+
+/* Pay Later button */
+.btn-pending-pay-later { flex:1;min-width:130px;padding:12px;background:#e67e22;color:#fff;border:none;border-radius:3px;font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer; }
+.btn-pending-pay-later:hover { background:#d35400; }
+.pending-detail-actions { flex-wrap:wrap; }
+
+/* Pay Later popup */
+.pay-later-bill-total { font-size:16px;font-weight:700;color:var(--navy);margin-bottom:14px;padding:10px 12px;background:var(--gold-pale2);border-radius:3px;border-left:4px solid var(--gold); }
+.pay-later-field-label { font-size:12px;font-weight:600;color:var(--text-light);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;margin-top:4px; }
+#payLaterAmountInput { width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:3px;font-size:22px;font-weight:700;color:var(--navy);text-align:center;outline:none;margin-bottom:12px; }
+#payLaterAmountInput:focus { border-color:var(--gold); }
+.pay-later-pending-row { display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#fff3e0;border-radius:3px;border:1px solid #f39c12;margin-bottom:4px; }
+.pay-later-pending-label { font-size:13px;font-weight:600;color:#e67e22; }
+.pay-later-pending-value { font-size:20px;font-weight:700;color:#c0392b; }
+
+/* Pay Later history card */
+.history-card-pay-later { border-left:3px solid #e67e22; }
+.history-card-pay-later .history-card-header { background:#4a2c0a; }
+.history-pay-later-row { display:flex;justify-content:space-between;align-items:center;padding:7px 14px;font-size:14px;color:#e67e22;background:#fff8f0;border-top:1px solid #f5d0a0; }
+.history-pay-later-pending { font-weight:700;color:#c0392b; }
